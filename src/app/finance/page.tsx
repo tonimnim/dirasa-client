@@ -96,99 +96,147 @@ export default function FinancePage() {
   const [cashNote, setCashNote] = useState("Direct wire transfer to School Operations Account");
   const [cashSuccess, setCashSuccess] = useState(false);
 
-  // Invoices Dataset
+  // Invoices Dataset matching DreamClass exact figures ($33,600.00 overdue across 10 invoices, $0.00 collected)
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([
     {
       id: "inv-001",
       invoiceNumber: "INV-2026-0891",
       studentId: "std-001",
-      studentName: "Tariq Mansoor",
-      grade: "Grade 7-A",
+      studentName: "Mason Harrington",
+      grade: "Grade 7 - Blue",
       term: "Term 1 2026/2027",
-      totalAmount: 2400,
-      paidAmount: 2400,
+      totalAmount: 3360,
+      paidAmount: 0,
       currency: "USD",
       dueDate: "2026-09-15",
-      status: "Paid",
-      primaryPayer: "Mansoor Al-Falasi (Father)",
-      splitBilling: [
-        { payerName: "Mansoor Al-Falasi", relationship: "Father", percentage: 60, amount: 1440 },
-        { payerName: "Noura Al-Falasi", relationship: "Mother", percentage: 40, amount: 960 },
-      ],
+      status: "Overdue",
+      primaryPayer: "Robert Harrington (Father)",
     },
     {
       id: "inv-002",
       invoiceNumber: "INV-2026-0892",
       studentId: "std-002",
-      studentName: "Amina Al-Falasi",
-      grade: "Grade 7-A",
+      studentName: "Caleb Bennett",
+      grade: "Grade 7 - Blue",
       term: "Term 1 2026/2027",
-      totalAmount: 2400,
-      paidAmount: 1200,
+      totalAmount: 3360,
+      paidAmount: 0,
       currency: "USD",
-      dueDate: "2026-10-15",
-      status: "Partial",
-      primaryPayer: "Dr. Khaled Al-Falasi",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Robert Bennett (Legal Guardian)",
     },
     {
       id: "inv-003",
       invoiceNumber: "INV-2026-0893",
       studentId: "std-003",
-      studentName: "Zayn Mwangi",
-      grade: "Grade 8-B",
+      studentName: "Adrian Orchard",
+      grade: "Grade 8 - Alpha",
       term: "Term 1 2026/2027",
-      totalAmount: 1850,
+      totalAmount: 3360,
       paidAmount: 0,
       currency: "USD",
-      dueDate: "2026-09-01",
+      dueDate: "2026-09-15",
       status: "Overdue",
-      primaryPayer: "Patrick Mwangi",
-      splitBilling: [
-        { payerName: "KCB Corporate Education Fund", relationship: "Sponsor", percentage: 70, amount: 1295 },
-        { payerName: "Patrick Mwangi", relationship: "Father", percentage: 30, amount: 555 },
-      ],
+      primaryPayer: "David Orchard (Father)",
     },
     {
       id: "inv-004",
       invoiceNumber: "INV-2026-0894",
-      studentId: "std-004",
-      studentName: "Fatima Zahra",
-      grade: "Grade 9-A",
+      studentId: "std-006",
+      studentName: "Zayn Mwangi",
+      grade: "Grade 8 - Beta",
       term: "Term 1 2026/2027",
-      totalAmount: 2600,
-      paidAmount: 2600,
+      totalAmount: 3360,
+      paidAmount: 0,
       currency: "USD",
-      dueDate: "2026-09-20",
-      status: "Paid",
-      primaryPayer: "Embassy Scholarship Fund (Kuwait)",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Eng. Joseph Mwangi (Father)",
     },
     {
       id: "inv-005",
       invoiceNumber: "INV-2026-0895",
-      studentId: "std-005",
-      studentName: "Bilal El-Sayed",
-      grade: "Grade 7-A",
+      studentId: "std-007",
+      studentName: "Fatima Zahra",
+      grade: "Grade 9 - Science",
       term: "Term 1 2026/2027",
-      totalAmount: 2100,
-      paidAmount: 700,
+      totalAmount: 3360,
+      paidAmount: 0,
       currency: "USD",
-      dueDate: "2026-09-30",
+      dueDate: "2026-09-15",
       status: "Overdue",
-      primaryPayer: "Mustafa El-Sayed",
+      primaryPayer: "Mariam Zahra (Mother)",
     },
     {
       id: "inv-006",
       invoiceNumber: "INV-2026-0896",
-      studentId: "std-006",
-      studentName: "Layla Benali",
-      grade: "Grade 8-B",
+      studentId: "std-008",
+      studentName: "Chloe Dubois",
+      grade: "Grade 7 - Gold",
       term: "Term 1 2026/2027",
-      totalAmount: 2100,
+      totalAmount: 3360,
       paidAmount: 0,
       currency: "USD",
-      dueDate: "2026-10-30",
-      status: "Draft",
-      primaryPayer: "Sofiane Benali",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Jean-Pierre Dubois (Father)",
+    },
+    {
+      id: "inv-007",
+      invoiceNumber: "INV-2026-0897",
+      studentId: "std-009",
+      studentName: "Lucas Silva",
+      grade: "Grade 8 - Alpha",
+      term: "Term 1 2026/2027",
+      totalAmount: 3360,
+      paidAmount: 0,
+      currency: "USD",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Thiago Silva (Father)",
+    },
+    {
+      id: "inv-008",
+      invoiceNumber: "INV-2026-0898",
+      studentId: "std-010",
+      studentName: "Aisha Kamau",
+      grade: "Grade 9 - Arts",
+      term: "Term 1 2026/2027",
+      totalAmount: 3360,
+      paidAmount: 0,
+      currency: "USD",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Samuel Kamau (Father)",
+    },
+    {
+      id: "inv-009",
+      invoiceNumber: "INV-2026-0899",
+      studentId: "std-011",
+      studentName: "Noah Kimani",
+      grade: "Grade 8 - Beta",
+      term: "Term 1 2026/2027",
+      totalAmount: 3360,
+      paidAmount: 0,
+      currency: "USD",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Grace Kimani (Mother)",
+    },
+    {
+      id: "inv-010",
+      invoiceNumber: "INV-2026-0900",
+      studentId: "std-014",
+      studentName: "Sophia Chen",
+      grade: "Grade 10 - Pre-Med",
+      term: "Term 1 2026/2027",
+      totalAmount: 3360,
+      paidAmount: 0,
+      currency: "USD",
+      dueDate: "2026-09-15",
+      status: "Overdue",
+      primaryPayer: "Wei Chen (Father)",
     },
   ]);
 
@@ -371,80 +419,58 @@ export default function FinancePage() {
             </div>
           </div>
 
-          {/* 4 Financial KPI Cards */}
+          {/* 4 Financial KPI Cards matching DreamClass Dashboard */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Total Invoiced */}
-            <Card>
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-500">Total Invoiced</p>
-                  <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-                    ${totalInvoiced.toLocaleString()}
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">6 Active Invoices</p>
+            {/* Card 1: Payments Collected */}
+            <div className="bg-[#def7ec] border border-[#bcf0da] rounded-xl p-4 flex flex-col justify-between shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-700 font-semibold">
+                <span>{invoices.filter((i) => i.status === "Paid").length} Payments</span>
+                <span className="text-emerald-700 text-[10px] font-bold uppercase">Reconciled</span>
+              </div>
+              <div className="py-2">
+                <div className="text-2xl font-black text-slate-900 tracking-tight">
+                  ${collectedRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
-                <div className="p-3 bg-sky-50 dark:bg-sky-950/40 text-sky-600 rounded-xl">
-                  <FileText className="h-5 w-5" />
-                </div>
-              </CardContent>
-            </Card>
+                <div className="text-[11px] text-slate-600 mt-0.5">Collected &middot; Last 30 days</div>
+              </div>
+            </div>
 
-            {/* Collected Revenue */}
-            <Card>
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-500">Collected Revenue</p>
-                  <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                    ${collectedRevenue.toLocaleString()}
-                  </p>
-                  <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium mt-0.5">
-                    <ArrowDownLeft className="h-3 w-3" /> Reconciled Funds
-                  </div>
+            {/* Card 2: Outstanding Invoices */}
+            <div className="bg-[#fef9c3] border border-[#fef08a] rounded-xl p-4 flex flex-col justify-between shadow-xs">
+              <div className="text-xs text-slate-700 font-semibold">
+                {invoices.filter((i) => i.status === "Overdue" || i.status === "Partial").length} Outstanding Invoices
+              </div>
+              <div className="py-2">
+                <div className="text-2xl font-black text-slate-900 tracking-tight">
+                  ${outstandingArrears.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 rounded-xl">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-              </CardContent>
-            </Card>
+                <div className="text-[11px] text-slate-600 mt-0.5">Issued until today</div>
+              </div>
+            </div>
 
-            {/* Outstanding Arrears */}
-            <Card>
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-500">Outstanding Arrears</p>
-                  <p className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">
-                    ${outstandingArrears.toLocaleString()}
-                  </p>
-                  <div className="flex items-center gap-1 text-[11px] text-rose-600 font-medium mt-0.5">
-                    <AlertCircle className="h-3 w-3" /> Due / Overdue
-                  </div>
+            {/* Card 3: Overdue Invoices */}
+            <div className="bg-[#ffe4e6] border border-[#fecdd3] rounded-xl p-4 flex flex-col justify-between shadow-xs">
+              <div className="text-xs text-slate-700 font-semibold">
+                {invoices.filter((i) => i.status === "Overdue").length} Overdue Invoices
+              </div>
+              <div className="py-2">
+                <div className="text-2xl font-black text-slate-900 tracking-tight">
+                  ${outstandingArrears.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
-                <div className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl">
-                  <Clock className="h-5 w-5" />
-                </div>
-              </CardContent>
-            </Card>
+                <div className="text-[11px] text-slate-600 mt-0.5">Due until today</div>
+              </div>
+            </div>
 
-            {/* Collection Rate */}
-            <Card>
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-500">Collection Rate</p>
-                  <p className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">
-                    {collectionRate}%
-                  </p>
-                  <div className="w-24 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-                    <div
-                      className="bg-indigo-600 h-full rounded-full transition-all duration-500"
-                      style={{ width: `${collectionRate}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-xl">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Card 4: Uninvoiced Fees */}
+            <div className="bg-[#e0f2fe] border border-[#bae6fd] rounded-xl p-4 flex flex-col justify-between shadow-xs">
+              <div className="text-xs text-slate-700 font-semibold">
+                8 Uninvoiced Fees
+              </div>
+              <div className="py-2">
+                <div className="text-2xl font-black text-slate-900 tracking-tight">$9,600.00</div>
+                <div className="text-[11px] text-slate-600 mt-0.5">Due until end of month</div>
+              </div>
+            </div>
           </div>
 
           {/* Filter Bar */}

@@ -30,17 +30,17 @@ interface StudentRegisterItem {
 
 export default function AttendancePage() {
   const [selectedDate, setSelectedDate] = useState("2026-10-01");
-  const [selectedSection, setSelectedSection] = useState("Grade 7-A (Homeroom)");
+  const [selectedSection, setSelectedSection] = useState("Grade 7 - Blue (Homeroom)");
   const [sessionKind, setSessionKind] = useState<"AM" | "PM">("AM");
   const [isSaved, setIsSaved] = useState(false);
 
   const [roster, setRoster] = useState<StudentRegisterItem[]>([
-    { id: "s1", name: "Tariq Mansoor", admissionNumber: "ADM-2024-001", mark: "Present" },
-    { id: "s2", name: "Amina Al-Falasi", admissionNumber: "ADM-2024-002", mark: "Present" },
-    { id: "s3", name: "Zayn Mwangi", admissionNumber: "ADM-2024-003", mark: "Late", minutesLate: 12 },
-    { id: "s4", name: "Fatima Zahra", admissionNumber: "ADM-2023-089", mark: "Present" },
-    { id: "s5", name: "Bilal El-Sayed", admissionNumber: "ADM-2024-012", mark: "AuthorisedAbsence", note: "Medical appointment" },
-    { id: "s6", name: "Layla Benali", admissionNumber: "ADM-2024-015", mark: "Present" },
+    { id: "s1", name: "Mason Harrington", admissionNumber: "ADM-2024-001", mark: "Present" },
+    { id: "s2", name: "Caleb Bennett", admissionNumber: "ADM-2024-002", mark: "Present" },
+    { id: "s3", name: "Tariq Mansoor", admissionNumber: "ADM-2024-004", mark: "Present" },
+    { id: "s4", name: "Amina Al-Falasi", admissionNumber: "ADM-2024-005", mark: "Late", minutesLate: 10 },
+    { id: "s5", name: "Chloe Dubois", admissionNumber: "ADM-2024-008", mark: "Present" },
+    { id: "s6", name: "Leila Hassan", admissionNumber: "ADM-2024-012", mark: "AuthorisedAbsence", note: "Approved dental visit" },
   ]);
 
   const updateMark = (id: string, newMark: MarkKind) => {
@@ -62,11 +62,35 @@ export default function AttendancePage() {
   const attendanceRate = (((presentCount + lateCount) / roster.length) * 100).toFixed(1);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans">
       <AppSidebar />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <AppHeader />
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#fafafa]">
+        <AppHeader
+          title="Daily Attendance Register"
+          subtitle="Statutory roll call &bull; Grade 7 - Blue &bull; Automated parent notifications"
+          badge="Register Open"
+          actionButton={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={markAllPresent}
+                className="gap-1.5 text-xs font-semibold bg-white border-slate-200"
+              >
+                <Check className="h-4 w-4 text-emerald-600" /> Mark All Present
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsSaved(true)}
+                className="gap-1.5 text-xs font-semibold bg-[#10b981] hover:bg-[#059669] text-white shadow-xs"
+              >
+                <Save className="h-4 w-4" /> Save Register
+              </Button>
+            </div>
+          }
+        />
 
         <main className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
           {/* Header Row */}
