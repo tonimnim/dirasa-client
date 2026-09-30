@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -371,6 +372,7 @@ export const INITIAL_STUDENTS: StudentProfile[] = [
 ];
 
 export default function StudentsDirectoryPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<StudentProfile[]>(INITIAL_STUDENTS);
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("All");
@@ -455,32 +457,37 @@ export default function StudentsDirectoryPage() {
   });
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
       <AppSidebar />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#fafafa]">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50 dark:bg-slate-950">
         <AppHeader
           title="Students Directory"
           subtitle="16 Active Students • Complete SIS profiles, safeguarding, academic records & balances"
           badge={`${students.length} Enrolled`}
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Students", current: true },
+          ]}
           actionButton={
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={exportCSV}
-                className="gap-1.5 text-xs text-slate-700 bg-white border-slate-200 hover:bg-slate-50"
+                className="gap-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500"
               >
                 <Download className="h-3.5 w-3.5" /> Export CSV
               </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsEnrollModalOpen(true)}
-                className="bg-[#10b981] hover:bg-[#059669] text-white font-bold gap-1.5 text-xs shadow-xs"
-              >
-                <Plus className="h-4 w-4" /> Enroll Student
-              </Button>
+              <Link href="/students/new">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1.5 text-xs shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                >
+                  <Plus className="h-4 w-4" /> Enroll Student
+                </Button>
+              </Link>
             </div>
           }
         />
@@ -488,74 +495,74 @@ export default function StudentsDirectoryPage() {
         <main className="p-6 max-w-[1600px] w-full mx-auto space-y-6">
           {/* Top Quick KPI Strip */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/90 dark:border-slate-800 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-xs text-slate-500 font-medium">Total Students</span>
-                <div className="text-2xl font-black text-slate-900 mt-0.5">{students.length}</div>
-                <span className="text-[11px] text-teal-600 font-medium">100% Verified Identities</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Students</span>
+                <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{students.length}</div>
+                <span className="text-[11px] text-teal-600 dark:text-teal-400 font-medium">100% Verified Identities</span>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
+              <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold">
                 <Users className="h-5 w-5" />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/90 dark:border-slate-800 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-xs text-slate-500 font-medium">Average Attendance</span>
-                <div className="text-2xl font-black text-emerald-600 mt-0.5">97.4%</div>
-                <span className="text-[11px] text-slate-400">Above 95% target</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Average Attendance</span>
+                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">97.4%</div>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">Above 95% target</span>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+              <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">
                 <Clock className="h-5 w-5" />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/90 dark:border-slate-800 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-xs text-slate-500 font-medium">Safeguarding Flags</span>
-                <div className="text-2xl font-black text-rose-600 mt-0.5">1 Alert</div>
-                <span className="text-[11px] text-rose-600 font-medium">Court custody order active</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Safeguarding Flags</span>
+                <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5">1 Alert</div>
+                <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium">Court custody order active</span>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+              <div className="h-10 w-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
                 <ShieldAlert className="h-5 w-5" />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/90 dark:border-slate-800 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-xs text-slate-500 font-medium">Outstanding Balances</span>
-                <div className="text-2xl font-black text-amber-600 mt-0.5">10 Overdue</div>
-                <span className="text-[11px] text-slate-500">$33,600.00 Total Due</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Outstanding Balances</span>
+                <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5">10 Overdue</div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">$33,600.00 Total Due</span>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+              <div className="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
                 <CreditCard className="h-5 w-5" />
               </div>
             </div>
           </div>
 
           {/* Filter & Search Bar */}
-          <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative w-full sm:w-96">
-              <Search className="h-4 w-4 text-slate-400 absolute start-3 top-1/2 -translate-y-1/2" />
+              <Search className="h-4 w-4 text-slate-400 dark:text-slate-500 absolute start-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search by student name, admission #, or class..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-9 ps-9 pe-4 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                className="w-full h-9 ps-9 pe-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-400"
               />
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-xs text-slate-500 font-medium shrink-0">Grade:</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium shrink-0">Grade:</span>
               {["All", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"].map((g) => (
                 <button
                   key={g}
                   onClick={() => setGradeFilter(g)}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                     gradeFilter === g
-                      ? "bg-[#cbf4e5] text-[#065f46]"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? "bg-[#cbf4e5] dark:bg-teal-950 text-[#065f46] dark:text-teal-300 border border-teal-300/40 dark:border-teal-800"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                   }`}
                 >
                   {g}
@@ -565,10 +572,10 @@ export default function StudentsDirectoryPage() {
           </div>
 
           {/* Students Directory Data Table */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-start text-xs">
-                <thead className="bg-[#f8fafc] border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                <thead className="bg-[#f8fafc] dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
                   <tr>
                     <th className="py-3 px-4 text-start">Student Name</th>
                     <th className="py-3 px-4 text-start">Admission ID</th>
@@ -580,18 +587,15 @@ export default function StudentsDirectoryPage() {
                     <th className="py-3 px-4 text-end">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                   {filtered.map((s) => (
                     <tr
                       key={s.id}
-                      onClick={() => {
-                        setSelectedStudent(s);
-                        setActiveTab("overview");
-                      }}
-                      className="hover:bg-teal-50/40 transition-colors cursor-pointer group"
+                      onClick={() => router.push(`/students/${s.id}`)}
+                      className="hover:bg-teal-50/40 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
                     >
-                      <td className="py-3 px-4 font-semibold text-slate-900 flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-[#e6f8f1] text-[#0d9488] font-black flex items-center justify-center text-xs shrink-0 border border-[#ccfbf1]">
+                      <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-[#e6f8f1] dark:bg-teal-950/80 text-[#0d9488] dark:text-teal-300 font-black flex items-center justify-center text-xs shrink-0 border border-[#ccfbf1] dark:border-teal-800">
                           {s.name
                             .split(" ")
                             .map((p) => p[0])
@@ -599,15 +603,15 @@ export default function StudentsDirectoryPage() {
                             .join("")}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold group-hover:text-teal-700 transition-colors truncate">
+                          <div className="font-bold group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors truncate">
                             {s.name}
                           </div>
-                          <div className="text-[10px] text-slate-400 flex items-center gap-1 font-normal">
+                          <div className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1 font-normal">
                             <span>{s.gender}</span>
                             <span>&bull;</span>
                             <span>DOB: {s.dob}</span>
                             {s.custodyAlert && (
-                              <span className="text-rose-600 font-bold flex items-center gap-0.5">
+                              <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-0.5">
                                 &bull; <ShieldAlert className="h-3 w-3" /> Custody Alert
                               </span>
                             )}
@@ -615,28 +619,28 @@ export default function StudentsDirectoryPage() {
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 font-mono text-slate-600 text-[11px]">
+                      <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-400 text-[11px]">
                         {s.admissionNumber}
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className="bg-slate-100 text-slate-800 font-semibold px-2 py-0.5 rounded text-[11px]">
+                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold px-2 py-0.5 rounded text-[11px]">
                           {s.classSection}
                         </span>
                       </td>
 
                       <td className="py-3 px-4">
-                        <div className="text-[11px] font-medium text-slate-800">
+                        <div className="text-[11px] font-medium text-slate-800 dark:text-slate-200">
                           {s.guardians[0]?.name || "None"}
                         </div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-[10px] text-slate-400 dark:text-slate-500">
                           {s.guardians[0]?.relationship} &bull; {s.guardians[0]?.phone}
                         </div>
                       </td>
 
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="w-16 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full ${
                                 s.attendanceRate >= 95 ? "bg-emerald-500" : "bg-amber-500"
@@ -644,17 +648,17 @@ export default function StudentsDirectoryPage() {
                               style={{ width: `${s.attendanceRate}%` }}
                             />
                           </div>
-                          <span className="font-semibold text-slate-800">{s.attendanceRate}%</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{s.attendanceRate}%</span>
                         </div>
                       </td>
 
                       <td className="py-3 px-4">
                         {s.balanceDue > 0 ? (
-                          <span className="text-rose-600 font-bold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-[11px]">
+                          <span className="text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 px-2 py-0.5 rounded text-[11px]">
                             ${s.balanceDue.toLocaleString()} Due
                           </span>
                         ) : (
-                          <span className="text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">
+                          <span className="text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded text-[11px]">
                             Settled $0.00
                           </span>
                         )}
@@ -665,16 +669,13 @@ export default function StudentsDirectoryPage() {
                       </td>
 
                       <td className="py-3 px-4 text-end">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedStudent(s);
-                            setActiveTab("overview");
-                          }}
-                          className="text-teal-700 hover:text-teal-900 font-semibold text-xs flex items-center gap-1 ms-auto"
+                        <Link
+                          href={`/students/${s.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-teal-700 dark:text-teal-400 hover:text-teal-900 dark:hover:text-teal-300 font-semibold text-xs flex items-center gap-1 ms-auto justify-end group/btn cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 rounded"
                         >
-                          View 360 <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
+                          <span className="group-hover/btn:underline">View Profile</span> <ChevronRight className="h-3.5 w-3.5" />
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -688,9 +689,9 @@ export default function StudentsDirectoryPage() {
       {/* Student 360 Slide-over Drawer */}
       {selectedStudent && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity">
-          <div className="bg-white w-full max-w-2xl h-full shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl h-full shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-200 border-s border-slate-200 dark:border-slate-800">
             {/* Drawer Header */}
-            <div className="p-6 bg-[#0d1527] text-white flex items-start justify-between">
+            <div className="p-6 bg-[#0d1527] dark:bg-slate-950 text-white flex items-start justify-between border-b border-slate-800">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-2xl bg-teal-500 text-white font-black text-xl flex items-center justify-center shadow-md">
                   {selectedStudent.name
@@ -714,14 +715,14 @@ export default function StudentsDirectoryPage() {
 
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Drawer Tabs */}
-            <div className="flex items-center border-b border-slate-200 px-6 bg-slate-50 text-xs font-semibold">
+            <div className="flex items-center border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50 dark:bg-slate-950 text-xs font-semibold">
               {[
                 { id: "overview", label: "Overview & Personal" },
                 { id: "guardians", label: "Guardians & Safeguarding" },
@@ -731,10 +732,10 @@ export default function StudentsDirectoryPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-3 px-3 border-b-2 font-bold transition-colors ${
+                  className={`py-3 px-3 border-b-2 font-bold transition-colors cursor-pointer ${
                     activeTab === tab.id
-                      ? "border-teal-600 text-teal-700 bg-white"
-                      : "border-transparent text-slate-500 hover:text-slate-900"
+                      ? "border-teal-600 dark:border-teal-400 text-teal-700 dark:text-teal-300 bg-white dark:bg-slate-900"
+                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   {tab.label}
@@ -743,12 +744,12 @@ export default function StudentsDirectoryPage() {
             </div>
 
             {/* Drawer Body Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-slate-700 dark:text-slate-300">
               {activeTab === "overview" && (
                 <div className="space-y-5">
                   {selectedStudent.custodyAlert && (
-                    <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-1">
-                      <div className="flex items-center gap-2 font-bold text-rose-800">
+                    <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-200 space-y-1">
+                      <div className="flex items-center gap-2 font-bold text-rose-800 dark:text-rose-300">
                         <ShieldAlert className="h-4 w-4" /> Legal Custody Restriction Active
                       </div>
                       <p className="text-[11px] leading-relaxed">{selectedStudent.custodyAlert}</p>
@@ -756,27 +757,27 @@ export default function StudentsDirectoryPage() {
                   )}
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Date of Birth</span>
-                      <p className="font-semibold text-slate-800 text-sm mt-0.5">{selectedStudent.dob}</p>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Date of Birth</span>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm mt-0.5">{selectedStudent.dob}</p>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Gender</span>
-                      <p className="font-semibold text-slate-800 text-sm mt-0.5">{selectedStudent.gender}</p>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Gender</span>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm mt-0.5">{selectedStudent.gender}</p>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Admission Date</span>
-                      <p className="font-semibold text-slate-800 text-sm mt-0.5">{selectedStudent.admissionDate}</p>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Admission Date</span>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm mt-0.5">{selectedStudent.admissionDate}</p>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">Attendance Rate</span>
-                      <p className="font-semibold text-emerald-600 text-sm mt-0.5">{selectedStudent.attendanceRate}%</p>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Attendance Rate</span>
+                      <p className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">{selectedStudent.attendanceRate}%</p>
                     </div>
                   </div>
 
                   {selectedStudent.medicalNotes && (
-                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-amber-900">
-                      <span className="text-[10px] text-amber-700 font-bold uppercase flex items-center gap-1">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/60 rounded-lg border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+                      <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold uppercase flex items-center gap-1">
                         <Heart className="h-3.5 w-3.5 text-rose-500" /> Medical & Health Alert
                       </span>
                       <p className="font-medium text-xs mt-1">{selectedStudent.medicalNotes}</p>
@@ -784,12 +785,12 @@ export default function StudentsDirectoryPage() {
                   )}
 
                   <div className="space-y-2">
-                    <h3 className="font-bold text-slate-900">Enrolled Courses (4 Courses)</h3>
+                    <h3 className="font-bold text-slate-900 dark:text-white">Enrolled Courses (4 Courses)</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedStudent.enrolledCourses.map((c) => (
-                        <div key={c} className="p-2.5 rounded-lg border border-slate-200 bg-white flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-teal-600" />
-                          <span className="font-medium text-slate-800">{c}</span>
+                        <div key={c} className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
+                          <BookOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                          <span className="font-medium text-slate-800 dark:text-slate-200">{c}</span>
                         </div>
                       ))}
                     </div>
@@ -800,38 +801,38 @@ export default function StudentsDirectoryPage() {
               {activeTab === "guardians" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-slate-900">Authorized Guardians & Contacts</h3>
-                    <span className="text-[10px] text-slate-500 font-medium">Safeguarded Directory</span>
+                    <h3 className="font-bold text-slate-900 dark:text-white">Authorized Guardians & Contacts</h3>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Safeguarded Directory</span>
                   </div>
 
                   {selectedStudent.guardians.map((g, idx) => (
-                    <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-xs">
+                    <div key={idx} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 space-y-3 shadow-xs">
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-slate-900 text-sm">{g.name}</h4>
+                            <h4 className="font-bold text-slate-900 dark:text-white text-sm">{g.name}</h4>
                             {g.isPrimary && (
-                              <span className="text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 px-2 py-0.5 rounded-full">
                                 Primary Billing & Contact
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-slate-500 mt-0.5">{g.relationship}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{g.relationship}</p>
                         </div>
 
-                        <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded">
+                        <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800/60">
                           <ShieldCheck className="h-3.5 w-3.5" />
                           <span>{g.canPickup ? "Authorized Pickup" : "No Collection"}</span>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                      <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-700">
                         <div className="flex items-center gap-2">
-                          <Phone className="h-3.5 w-3.5 text-slate-400" />
+                          <Phone className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                           <span>{g.phone}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Mail className="h-3.5 w-3.5 text-slate-400" />
+                          <Mail className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                           <span className="truncate">{g.email}</span>
                         </div>
                       </div>
@@ -842,36 +843,36 @@ export default function StudentsDirectoryPage() {
 
               {activeTab === "academics" && (
                 <div className="space-y-4">
-                  <h3 className="font-bold text-slate-900">Academic Progress & Attendance</h3>
-                  <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+                  <h3 className="font-bold text-slate-900 dark:text-white">Academic Progress & Attendance</h3>
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 space-y-3">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500">Academic Year</span>
-                      <span className="font-bold text-slate-900">Sep 2026 - Jul 2027</span>
+                      <span className="text-slate-500 dark:text-slate-400">Academic Year</span>
+                      <span className="font-bold text-slate-900 dark:text-white">Sep 2026 - Jul 2027</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500">Current Homeroom Section</span>
-                      <span className="font-bold text-teal-700">{selectedStudent.classSection}</span>
+                      <span className="text-slate-500 dark:text-slate-400">Current Homeroom Section</span>
+                      <span className="font-bold text-teal-700 dark:text-teal-400">{selectedStudent.classSection}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500">Tardy Count</span>
-                      <span className="font-bold text-slate-700">{selectedStudent.tardies} incidents</span>
+                      <span className="text-slate-500 dark:text-slate-400">Tardy Count</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{selectedStudent.tardies} incidents</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500">Unexcused Absences</span>
-                      <span className="font-bold text-slate-700">{selectedStudent.unexcusedAbsences} days</span>
+                      <span className="text-slate-500 dark:text-slate-400">Unexcused Absences</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{selectedStudent.unexcusedAbsences} days</span>
                     </div>
                   </div>
 
                   <div className="pt-2 flex items-center justify-between">
                     <Link
                       href="/grading"
-                      className="text-teal-700 hover:underline font-bold text-xs flex items-center gap-1"
+                      className="text-teal-700 dark:text-teal-400 hover:underline font-bold text-xs flex items-center gap-1 cursor-pointer"
                     >
                       Open Gradebook Broadsheet &rarr;
                     </Link>
                     <Link
                       href="/attendance"
-                      className="text-teal-700 hover:underline font-bold text-xs flex items-center gap-1"
+                      className="text-teal-700 dark:text-teal-400 hover:underline font-bold text-xs flex items-center gap-1 cursor-pointer"
                     >
                       View Full Attendance Register &rarr;
                     </Link>
@@ -881,31 +882,31 @@ export default function StudentsDirectoryPage() {
 
               {activeTab === "billing" && (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-slate-500 font-medium">Outstanding Balance</span>
-                      <div className="text-2xl font-black text-rose-600 mt-0.5">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Outstanding Balance</span>
+                      <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5">
                         ${selectedStudent.balanceDue.toLocaleString()}
                       </div>
                       <span className="text-[11px] text-slate-400">Term 1 2026/2027 Tuition</span>
                     </div>
                     <Link
                       href="/fees"
-                      className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg"
+                      className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg cursor-pointer"
                     >
                       Receive Payment
                     </Link>
                   </div>
 
-                  <h3 className="font-bold text-slate-900 pt-2">Recent Invoices</h3>
-                  <div className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
+                  <h3 className="font-bold text-slate-900 dark:text-white pt-2">Recent Invoices</h3>
+                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-slate-900">INV-2026-0891</p>
+                      <p className="font-bold text-slate-900 dark:text-white">INV-2026-0891</p>
                       <p className="text-[11px] text-slate-400">Due Sep 15, 2026</p>
                     </div>
                     <div className="text-end">
-                      <p className="font-bold text-slate-900">${selectedStudent.balanceDue.toLocaleString()}</p>
-                      <span className="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded">
+                      <p className="font-bold text-slate-900 dark:text-white">${selectedStudent.balanceDue.toLocaleString()}</p>
+                      <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded">
                         {selectedStudent.balanceDue > 0 ? "Overdue" : "Settled"}
                       </span>
                     </div>
@@ -915,21 +916,21 @@ export default function StudentsDirectoryPage() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedStudent(null)}
-                className="text-xs"
+                className="text-xs cursor-pointer"
               >
                 Close Profile
               </Button>
               <div className="flex items-center gap-2">
                 <Link
                   href={`/messages?student=${selectedStudent.id}`}
-                  className="bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Mail className="h-3.5 w-3.5 text-teal-600" /> Message Family
+                  <Mail className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" /> Message Family
                 </Link>
               </div>
             </div>
@@ -940,15 +941,15 @@ export default function StudentsDirectoryPage() {
       {/* Enroll Student Modal */}
       {isEnrollModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-5 bg-[#0d1527] text-white flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 border border-slate-200 dark:border-slate-800">
+            <div className="p-5 bg-[#0d1527] dark:bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
               <div>
                 <h3 className="font-bold text-base">Enroll New Student</h3>
                 <p className="text-xs text-slate-300">Official registry entry & homeroom assignment</p>
               </div>
               <button
                 onClick={() => setIsEnrollModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -956,24 +957,24 @@ export default function StudentsDirectoryPage() {
 
             <form onSubmit={handleEnrollStudent} className="p-6 space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Full Name *</label>
+                <label className="font-bold text-slate-700 dark:text-slate-300">Full Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Mason Harrington"
                   value={newStudentName}
                   onChange={(e) => setNewStudentName(e.target.value)}
-                  className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg text-xs focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-400"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Gender</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Gender</label>
                   <select
                     value={newStudentGender}
                     onChange={(e) => setNewStudentGender(e.target.value as any)}
-                    className="w-full h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                    className="w-full h-9 px-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-xs"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -981,23 +982,23 @@ export default function StudentsDirectoryPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Date of Birth</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Date of Birth</label>
                   <input
                     type="date"
                     value={newStudentDob}
                     onChange={(e) => setNewStudentDob(e.target.value)}
-                    className="w-full h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                    className="w-full h-9 px-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-xs"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Grade Level</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Grade Level</label>
                   <select
                     value={newStudentGrade}
                     onChange={(e) => setNewStudentGrade(e.target.value)}
-                    className="w-full h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                    className="w-full h-9 px-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-xs"
                   >
                     <option value="Grade 7">Grade 7</option>
                     <option value="Grade 8">Grade 8</option>
@@ -1009,11 +1010,11 @@ export default function StudentsDirectoryPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Class Section</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Class Section</label>
                   <select
                     value={newStudentClass}
                     onChange={(e) => setNewStudentClass(e.target.value)}
-                    className="w-full h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                    className="w-full h-9 px-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-xs"
                   >
                     <option value="Grade 7 - Blue">Grade 7 - Blue</option>
                     <option value="Grade 7 - Gold">Grade 7 - Gold</option>
@@ -1024,53 +1025,54 @@ export default function StudentsDirectoryPage() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 space-y-3">
-                <span className="font-bold text-slate-800 uppercase text-[10px] tracking-wider block">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <span className="font-bold text-slate-800 dark:text-slate-200 uppercase text-[10px] tracking-wider block">
                   Primary Guardian Information
                 </span>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Guardian Name</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Guardian Name</label>
                   <input
                     type="text"
                     placeholder="e.g. Robert Harrington"
                     value={newGuardianName}
                     onChange={(e) => setNewGuardianName(e.target.value)}
-                    className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs"
+                    className="w-full h-9 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg text-xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Phone Number</label>
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Phone Number</label>
                     <input
                       type="text"
                       placeholder="+971 50..."
                       value={newGuardianPhone}
                       onChange={(e) => setNewGuardianPhone(e.target.value)}
-                      className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs"
+                      className="w-full h-9 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg text-xs"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Email Address</label>
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Email Address</label>
                     <input
                       type="email"
                       placeholder="parent@..."
                       value={newGuardianEmail}
                       onChange={(e) => setNewGuardianEmail(e.target.value)}
-                      className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs"
+                      className="w-full h-9 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg text-xs"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
+              <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEnrollModalOpen(false)}
+                  className="cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -1078,7 +1080,7 @@ export default function StudentsDirectoryPage() {
                   type="submit"
                   variant="primary"
                   size="sm"
-                  className="bg-[#10b981] hover:bg-[#059669] text-white font-bold"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                 >
                   Confirm & Enroll
                 </Button>

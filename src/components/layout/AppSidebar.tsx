@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/context";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import {
   Home,
   Calendar,
@@ -110,7 +111,7 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-1.5 rounded-md font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400",
                 isActive
                   ? "bg-slate-800/90 text-white font-semibold"
                   : "text-slate-300 hover:text-white hover:bg-slate-800/50"
@@ -138,7 +139,7 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-1.5 rounded-md font-medium transition-colors justify-between",
+                "flex items-center gap-3 px-3 py-1.5 rounded-md font-medium transition-colors justify-between cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400",
                 isActive
                   ? "bg-slate-800/90 text-white font-semibold"
                   : "text-slate-300 hover:text-white hover:bg-slate-800/50"
@@ -167,7 +168,7 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-1.5 rounded-md font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400",
                 isActive
                   ? "bg-slate-800/90 text-white font-semibold"
                   : "text-slate-300 hover:text-white hover:bg-slate-800/50"
@@ -180,20 +181,20 @@ export function AppSidebar() {
         })}
       </div>
 
-      {/* User Profile Pill at Bottom */}
+      {/* User Profile & Theme Toggle at Bottom */}
       <div className="p-3 border-t border-slate-800/60 bg-[#090f1d]">
-        <div className="flex items-center justify-between p-1.5 rounded-md hover:bg-slate-800/50 transition-colors cursor-pointer group">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-7 w-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-200">
+        <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-2 min-w-0 flex-1 p-1 rounded-md hover:bg-slate-800/50 transition-colors cursor-pointer group">
+            <div className="h-7 w-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-200 shrink-0">
               <User className="h-4 w-4" />
             </div>
-            <span className="text-xs font-medium text-slate-200 truncate max-w-[110px]">
+            <span className="text-xs font-medium text-slate-200 truncate max-w-[96px]">
               {user?.displayName || "moses wetan..."}
             </span>
           </div>
-          <button className="text-slate-500 group-hover:text-slate-200 p-1">
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
+          <div className="shrink-0">
+            <ThemeToggle size="sm" />
+          </div>
         </div>
       </div>
     </aside>

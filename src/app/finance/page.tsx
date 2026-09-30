@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
@@ -67,37 +68,8 @@ interface LedgerTransaction {
   balance: number;
 }
 
-export default function FinancePage() {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
-  const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
-  const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
-
-  // Payment Drawer Modes: "mpesa" | "paystack" | "cash_bank"
-  const [paymentMethod, setPaymentMethod] = useState<"mpesa" | "paystack" | "cash_bank">("mpesa");
-
-  // M-Pesa STK Push Form State
-  const [mpesaPhone, setMpesaPhone] = useState("254712345678");
-  const [mpesaAmount, setMpesaAmount] = useState<number>(500);
-  const [mpesaStatus, setMpesaStatus] = useState<"idle" | "sending" | "waiting_pin" | "success" | "error">("idle");
-  const [mpesaReceipt, setMpesaReceipt] = useState("");
-
-  // Paystack Form State
-  const [paystackEmail, setPaystackEmail] = useState("parent.finance@example.com");
-  const [paystackCurrency, setPaystackCurrency] = useState("USD");
-  const [paystackCardNumber, setPaystackCardNumber] = useState("4084 0000 0000 1284");
-  const [paystackStatus, setPaystackStatus] = useState<"idle" | "processing" | "success">("idle");
-  const [paystackRef, setPaystackRef] = useState("");
-
-  // Cash / Bank Form State
-  const [tellerRef, setTellerRef] = useState("BNK-TX-99214");
-  const [cashAmount, setCashAmount] = useState<number>(500);
-  const [cashNote, setCashNote] = useState("Direct wire transfer to School Operations Account");
-  const [cashSuccess, setCashSuccess] = useState(false);
-
-  // Invoices Dataset matching DreamClass exact figures ($33,600.00 overdue across 10 invoices, $0.00 collected)
-  const [invoices, setInvoices] = useState<InvoiceRecord[]>([
+// Invoices Dataset matching DreamClass exact figures ($33,600.00 overdue across 10 invoices, $0.00 collected)
+export const INITIAL_INVOICES: InvoiceRecord[] = [
     {
       id: "inv-001",
       invoiceNumber: "INV-2026-0891",
@@ -238,7 +210,39 @@ export default function FinancePage() {
       status: "Overdue",
       primaryPayer: "Wei Chen (Father)",
     },
-  ]);
+  ];
+
+export default function FinancePage() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
+  const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
+  const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
+
+  // Payment Drawer Modes: "mpesa" | "paystack" | "cash_bank"
+  const [paymentMethod, setPaymentMethod] = useState<"mpesa" | "paystack" | "cash_bank">("mpesa");
+
+  // M-Pesa STK Push Form State
+  const [mpesaPhone, setMpesaPhone] = useState("254712345678");
+  const [mpesaAmount, setMpesaAmount] = useState<number>(500);
+  const [mpesaStatus, setMpesaStatus] = useState<"idle" | "sending" | "waiting_pin" | "success" | "error">("idle");
+  const [mpesaReceipt, setMpesaReceipt] = useState("");
+
+  // Paystack Form State
+  const [paystackEmail, setPaystackEmail] = useState("parent.finance@example.com");
+  const [paystackCurrency, setPaystackCurrency] = useState("USD");
+  const [paystackCardNumber, setPaystackCardNumber] = useState("4084 0000 0000 1284");
+  const [paystackStatus, setPaystackStatus] = useState<"idle" | "processing" | "success">("idle");
+  const [paystackRef, setPaystackRef] = useState("");
+
+  // Cash / Bank Form State
+  const [tellerRef, setTellerRef] = useState("BNK-TX-99214");
+  const [cashAmount, setCashAmount] = useState<number>(500);
+  const [cashNote, setCashNote] = useState("Direct wire transfer to School Operations Account");
+  const [cashSuccess, setCashSuccess] = useState(false);
+
+// Invoices Dataset matching DreamClass exact figures ($33,600.00 overdue across 10 invoices, $0.00 collected)
+  const [invoices, setInvoices] = useState<InvoiceRecord[]>(INITIAL_INVOICES);
 
   // Double-Entry Ledger Transactions
   const ledgerEntries: LedgerTransaction[] = [
@@ -408,14 +412,15 @@ export default function FinancePage() {
               >
                 <Download className="h-3.5 w-3.5" /> Export Statement
               </Button>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => alert("Billing run initiated for 2026/2027 Term 1.")}
-                className="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700"
-              >
-                <Plus className="h-3.5 w-3.5" /> New Billing Run
-              </Button>
+              <Link href="/fees/new">
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Generate Invoice
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -527,7 +532,8 @@ export default function FinancePage() {
                   {filteredInvoices.map((inv) => (
                     <tr
                       key={inv.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
+                      onClick={() => handleOpenPayment(inv)}
+                      className="hover:bg-emerald-50/50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
                     >
                       <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
                         {inv.invoiceNumber}

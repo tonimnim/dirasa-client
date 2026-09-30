@@ -701,6 +701,15 @@ const formatHourToTimeStr = (hourVal: number): string => {
               </button>
             </div>
 
+            {/* Plan Lesson / Event Dedicated Page Button */}
+            <Link
+              href="/calendar/new"
+              className="bg-[#10b981] hover:bg-[#059669] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Plan Lesson / Event</span>
+            </Link>
+
             {/* Settings Button */}
             <Link
               href="/settings"
@@ -796,6 +805,15 @@ const formatHourToTimeStr = (hourVal: number): string => {
                   >
                     Add School Event
                   </button>
+                  <div className="border-t border-slate-100 my-1" />
+                  <Link
+                    href="/calendar/new"
+                    onClick={() => setIsJumpToOpen(false)}
+                    className="flex items-center justify-between px-4 py-2 hover:bg-emerald-50 text-emerald-700 font-semibold transition-colors"
+                  >
+                    <span>Deep Full-Page Scheduler</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
               )}
             </div>
@@ -897,6 +915,14 @@ const formatHourToTimeStr = (hourVal: number): string => {
                 </div>
               )}
             </div>
+
+            {/* Deep Scheduler Link Button */}
+            <Link
+              href="/calendar/new"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-xs transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Deep Scheduler
+            </Link>
 
             {/* More Options */}
             <button className="p-1.5 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-100">
