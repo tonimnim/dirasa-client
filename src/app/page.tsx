@@ -30,6 +30,7 @@ import {
   Send,
   HelpCircle,
   FileText,
+  Palette,
 } from "lucide-react";
 
 export default function DreamClassDashboard() {
@@ -45,19 +46,40 @@ export default function DreamClassDashboard() {
     {
       id: "ev-1",
       title: "Midweek School Meeting",
-      date: "10/07/2026",
+      date: "09/30/2026",
       time: "2:00 PM - 3:00 PM",
       location: "Main Hall",
       isRecurring: true,
       hasAttendees: true,
+      color: "salmon",
+      colorName: "red-300",
+      description: "Weekly staff & student assembly to review weekly academic milestones.",
+    },
+    {
+      id: "ev-2",
+      title: "Science Fair Exhibition",
+      date: "09/30/2026",
+      time: "3:30 PM - 5:00 PM",
+      location: "Auditorium",
+      isRecurring: false,
+      hasAttendees: true,
+      color: "periwinkle",
+      colorName: "purple-400",
+      description: "Students will showcase their science projects and experiments to peers,...",
     },
   ]);
 
-  // New Event Form State
+  // New Event Form State (Screenshot 6)
   const [newEventTitle, setNewEventTitle] = useState("");
-  const [newEventDate, setNewEventDate] = useState("2026-10-08");
-  const [newEventTime, setNewEventTime] = useState("10:00 AM - 11:30 AM");
-  const [newEventLocation, setNewEventLocation] = useState("Auditorium");
+  const [newEventDesc, setNewEventDesc] = useState("");
+  const [newEventDate, setNewEventDate] = useState("2026-09-30");
+  const [newEventStartTime, setNewEventStartTime] = useState("10:30 AM");
+  const [newEventDurationHours, setNewEventDurationHours] = useState<number | "">("");
+  const [newEventDurationMinutes, setNewEventDurationMinutes] = useState(15);
+  const [newEventColor, setNewEventColor] = useState("purple-400");
+  const [newEventVisibleStudents, setNewEventVisibleStudents] = useState(true);
+  const [newEventVisibleTeachers, setNewEventVisibleTeachers] = useState(true);
+  const [isRecurringEvent, setIsRecurringEvent] = useState(false);
 
   // In-App Chat State
   const [chatMessages, setChatMessages] = useState<{ sender: "user" | "bot"; text: string }[]>([
@@ -96,17 +118,21 @@ export default function DreamClassDashboard() {
     setEvents((prev) => [
       ...prev,
       {
-        id: `ev-${prev.length + 1}`,
+        id: `ev-${Date.now()}`,
         title: newEventTitle,
         date: newEventDate,
-        time: newEventTime,
-        location: newEventLocation,
-        isRecurring: false,
+        time: `${newEventStartTime} (${newEventDurationHours || 0}h ${newEventDurationMinutes}m)`,
+        location: "Main Hall",
+        isRecurring: isRecurringEvent,
         hasAttendees: true,
+        color: "periwinkle",
+        colorName: newEventColor,
+        description: newEventDesc,
       },
     ]);
     setIsAddEventModalOpen(false);
     setNewEventTitle("");
+    setNewEventDesc("");
   };
 
   return (
@@ -536,23 +562,32 @@ export default function DreamClassDashboard() {
                   {events.map((ev) => (
                     <div
                       key={ev.id}
-                      className="bg-[#fda4af] text-slate-900 rounded-lg p-3 shadow-xs space-y-2 border border-rose-300"
+                      className={`rounded-lg p-3 shadow-xs space-y-2 border ${
+                        ev.color === "salmon"
+                          ? "bg-[#fda4af] text-slate-900 border-rose-300"
+                          : "bg-[#818cf8] text-white border-indigo-400"
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold leading-tight">{ev.title}</span>
-                        <div className="flex items-center gap-1 text-slate-700">
+                        <div className={`flex items-center gap-1 ${ev.color === "salmon" ? "text-slate-700" : "text-white/80"}`}>
                           {ev.isRecurring && <Repeat className="h-3 w-3" />}
                           {ev.hasAttendees && <Users className="h-3 w-3" />}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-800 font-medium">
+                      <div className={`flex items-center gap-1.5 text-[11px] font-medium ${ev.color === "salmon" ? "text-slate-800" : "text-white/90"}`}>
                         <Clock className="h-3 w-3" />
                         <span>
                           {ev.date} {ev.time}
                         </span>
                       </div>
+                      {ev.description && (
+                        <p className={`text-[10px] line-clamp-2 leading-tight ${ev.color === "salmon" ? "text-slate-700" : "text-white/80"}`}>
+                          {ev.description}
+                        </p>
+                      )}
                       {ev.location && (
-                        <div className="flex items-center gap-1 text-[10px] text-slate-700">
+                        <div className={`flex items-center gap-1 text-[10px] ${ev.color === "salmon" ? "text-slate-700" : "text-white/80"}`}>
                           <MapPin className="h-3 w-3" />
                           <span>{ev.location}</span>
                         </div>
@@ -563,14 +598,20 @@ export default function DreamClassDashboard() {
 
                 <div className="pt-1 text-[11px] text-center text-[#047857] font-semibold">
                   <button
-                    onClick={() => setIsAddEventModalOpen(true)}
+                    onClick={() => {
+                      setIsRecurringEvent(false);
+                      setIsAddEventModalOpen(true);
+                    }}
                     className="hover:underline cursor-pointer"
                   >
                     Add event
                   </button>{" "}
                   |{" "}
                   <button
-                    onClick={() => setIsAddEventModalOpen(true)}
+                    onClick={() => {
+                      setIsRecurringEvent(true);
+                      setIsAddEventModalOpen(true);
+                    }}
                     className="hover:underline cursor-pointer"
                   >
                     Add recurring event
@@ -758,18 +799,17 @@ export default function DreamClassDashboard() {
         </div>
       )}
 
-      {/* Add School Event Modal */}
+      {/* Add School Event Modal (matching Screenshot 6) */}
       {isAddEventModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 bg-[#0d1527] text-white flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-sm">Add School Event</h3>
-                <p className="text-[11px] text-slate-300">Schedule academic calendar meeting or holiday</p>
-              </div>
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-base">
+                {isRecurringEvent ? "Add Recurring School Event" : "Add School Event"}
+              </h3>
               <button
                 onClick={() => setIsAddEventModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-slate-700 p-1"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -777,64 +817,126 @@ export default function DreamClassDashboard() {
 
             <form onSubmit={handleCreateEvent} className="p-6 space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Event Title *</label>
+                <label className="font-bold text-slate-700">Title*</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Midterm Parent-Teacher Conference"
                   value={newEventTitle}
                   onChange={(e) => setNewEventTitle(e.target.value)}
-                  className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs"
+                  placeholder="e.g. Science Fair Exhibition"
+                  className="w-full h-10 px-3 border border-slate-300 rounded-lg text-xs bg-white"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Date</label>
-                  <input
-                    type="date"
-                    value={newEventDate}
-                    onChange={(e) => setNewEventDate(e.target.value)}
-                    className="w-full h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700">Description</label>
+                <textarea
+                  rows={2}
+                  value={newEventDesc}
+                  onChange={(e) => setNewEventDesc(e.target.value)}
+                  placeholder="Event agenda or notes..."
+                  className="w-full p-3 border border-slate-300 rounded-lg text-xs bg-white"
+                />
+              </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Time Range</label>
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700">Date*</label>
+                <input
+                  type="date"
+                  value={newEventDate}
+                  onChange={(e) => setNewEventDate(e.target.value)}
+                  className="w-full h-10 px-3 border border-slate-300 rounded-lg text-xs bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700">Start Time*</label>
+                <div className="relative">
                   <input
                     type="text"
-                    placeholder="e.g. 02:00 PM - 03:30 PM"
-                    value={newEventTime}
-                    onChange={(e) => setNewEventTime(e.target.value)}
-                    className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs"
+                    value={newEventStartTime}
+                    onChange={(e) => setNewEventStartTime(e.target.value)}
+                    className="w-full h-10 px-3 border border-slate-300 rounded-lg text-xs bg-white"
                   />
+                  <Clock className="h-4 w-4 text-slate-400 absolute end-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Location / Room</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Main Auditorium"
-                  value={newEventLocation}
-                  onChange={(e) => setNewEventLocation(e.target.value)}
-                  className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs"
-                />
+                <label className="font-bold text-slate-700">Duration*</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <span className="text-[10px] text-slate-500">Hours</span>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={newEventDurationHours}
+                      onChange={(e) => setNewEventDurationHours(e.target.value === "" ? "" : Number(e.target.value))}
+                      className="w-full h-10 px-3 border border-slate-300 rounded-lg text-xs bg-white mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500">Minutes</span>
+                    <input
+                      type="number"
+                      value={newEventDurationMinutes}
+                      onChange={(e) => setNewEventDurationMinutes(Number(e.target.value))}
+                      className="w-full h-10 px-3 border border-slate-300 rounded-lg text-xs bg-white mt-0.5"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700">Color*</label>
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    value={newEventColor}
+                    onChange={(e) => setNewEventColor(e.target.value)}
+                    className="w-full h-10 ps-3 pe-10 border border-slate-300 rounded-lg text-xs bg-white"
+                  />
+                  <span className="absolute end-3 h-5 w-5 rounded-full bg-purple-500 flex items-center justify-center text-white">
+                    <Palette className="h-3 w-3" />
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <label className="flex items-center gap-2 font-medium text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newEventVisibleStudents}
+                    onChange={(e) => setNewEventVisibleStudents(e.target.checked)}
+                    className="h-4 w-4 rounded text-teal-600 focus:ring-teal-500 border-slate-300"
+                  />
+                  <span>Visible to students</span>
+                </label>
+
+                <label className="flex items-center gap-2 font-medium text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newEventVisibleTeachers}
+                    onChange={(e) => setNewEventVisibleTeachers(e.target.checked)}
+                    className="h-4 w-4 rounded text-teal-600 focus:ring-teal-500 border-slate-300"
+                  />
+                  <span>Visible to teachers</span>
+                </label>
+              </div>
+
+              <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsAddEventModalOpen(false)}
-                  className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-lg text-xs font-bold shadow-xs"
+                  className="px-5 py-2 rounded-lg text-xs font-bold text-white bg-[#0d9488] hover:bg-[#0f766e] shadow-xs"
                 >
-                  Save Event
+                  Save
                 </button>
               </div>
             </form>
