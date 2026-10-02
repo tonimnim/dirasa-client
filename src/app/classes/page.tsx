@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Badge } from "@/components/legacy-ui/Badge";
 import {
   GraduationCap,
   Users,
@@ -302,7 +302,7 @@ export default function ClassesPage() {
           subtitle="11 Active Classes • 44 Curriculum Courses • Academic period Sep 2026 - Jul 2027"
           badge="11 Classes & 44 Courses"
           breadcrumbs={[
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "Classes", current: true },
           ]}
           actionButton={

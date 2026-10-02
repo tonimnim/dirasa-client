@@ -3,9 +3,9 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/legacy-ui/Card";
+import { Badge } from "@/components/legacy-ui/Badge";
 import {
   GraduationCap,
   Calendar,

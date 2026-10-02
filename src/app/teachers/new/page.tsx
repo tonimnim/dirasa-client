@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/legacy-ui/Button";
 import {
   UserCheck,
   Mail,
@@ -62,7 +62,7 @@ export default function NewTeacherPage() {
           title="Add New Faculty Member"
           subtitle="Register an academic instructor or pastoral supervisor into the institutional records"
           breadcrumbs={[
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "Teachers", href: "/teachers" },
             { label: "New Teacher", current: true },
           ]}

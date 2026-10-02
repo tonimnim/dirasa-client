@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/legacy-ui/Button";
 import {
   User,
   GraduationCap,
@@ -67,7 +67,7 @@ export default function NewStudentPage() {
           title="Enroll New Student"
           subtitle="Register a new scholar into the institutional Student Information System (SIS)"
           breadcrumbs={[
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "Students", href: "/students" },
             { label: "New Student", current: true },
           ]}

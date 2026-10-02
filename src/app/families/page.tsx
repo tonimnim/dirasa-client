@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Badge } from "@/components/legacy-ui/Badge";
 import {
   Users,
   Search,

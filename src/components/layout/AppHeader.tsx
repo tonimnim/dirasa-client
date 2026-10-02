@@ -1,18 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/context";
-import { Breadcrumbs, BreadcrumbItem } from "@/components/ui/Breadcrumbs";
+import { describeAuthError } from "@/lib/auth/errors";
+import { Breadcrumbs, BreadcrumbItem } from "@/components/legacy-ui/Breadcrumbs";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
-  Bell,
-  Search,
-  School,
-  Globe,
-  LogOut,
-  ChevronDown,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Bell, Check, ChevronDown, Globe, LogOut, MonitorSmartphone, School } from "lucide-react";
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
+}
 
 export interface AppHeaderProps {
   title?: string;
@@ -23,9 +33,22 @@ export interface AppHeaderProps {
 }
 
 export function AppHeader({ title, subtitle, badge, breadcrumbs, actionButton }: AppHeaderProps = {}) {
-  const { user, activeTenant, switchSchool, logout } = useAuth();
-  const [showSchoolDropdown, setShowSchoolDropdown] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const { user, activeTenant, schools, switchSchool, signOut, signOutEverywhere } = useAuth();
+
+  const changeSchool = async (tenantId: string, name: string) => {
+    if (tenantId === activeTenant?.id) return;
+    try {
+      await switchSchool(tenantId);
+      toast.success(`Switched to ${name}`);
+    } catch (err) {
+      toast.error(describeAuthError(err));
+    }
+  };
+
+  const signOutAllDevices = async () => {
+    await signOutEverywhere();
+    toast.success("Signed out on every device");
+  };
 
   const toggleDirection = (locale: string) => {
     const isRtl = locale === "ar";
@@ -58,47 +81,28 @@ export function AppHeader({ title, subtitle, badge, breadcrumbs, actionButton }:
         ) : (
           <div className="flex items-center gap-3">
             {/* School Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSchoolDropdown(!showSchoolDropdown)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 cursor-pointer transition-colors"
-                aria-label="Switch school"
-                aria-expanded={showSchoolDropdown}
-              >
-                <School className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
-                <span className="truncate max-w-[160px]">
-                  {activeTenant?.name || "REDCO ACADEMY"}
-                </span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-              </button>
-
-              {showSchoolDropdown && user?.memberships && user.memberships.length > 0 && (
-                <div className="absolute top-full mt-1.5 start-0 w-64 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 py-1 z-50">
-                  <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Switch School
-                  </div>
-                  {user.memberships.map((membership) => (
-                    <button
-                      key={membership.tenantId}
-                      onClick={async () => {
-                        await switchSchool(membership.tenantId);
-                        setShowSchoolDropdown(false);
-                      }}
-                      className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer ${
-                        activeTenant?.id === membership.tenantId
-                          ? "text-teal-600 dark:text-teal-400 font-semibold bg-teal-50 dark:bg-teal-950/40"
-                          : "text-slate-700 dark:text-slate-200"
-                      }`}
-                    >
-                      <span className="truncate">{membership.schoolName}</span>
-                      <span className="text-[10px] text-slate-400 uppercase">
-                        {membership.roles[0]}
-                      </span>
-                    </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="outline" size="sm" aria-label="Switch school" />}>
+                <School data-icon="inline-start" className="text-teal-600 dark:text-teal-400" />
+                <span className="max-w-[160px] truncate">{activeTenant?.name ?? "No school selected"}</span>
+                <ChevronDown data-icon="inline-end" className="text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Switch school</DropdownMenuLabel>
+                  {schools.map((school) => (
+                    <DropdownMenuItem key={school.tenantId} onClick={() => changeSchool(school.tenantId, school.name)}>
+                      <span className="flex-1 truncate">{school.name}</span>
+                      {activeTenant?.id === school.tenantId ? (
+                        <Check className="text-primary" />
+                      ) : (
+                        <span className="text-[10px] uppercase text-muted-foreground">{school.roles[0]}</span>
+                      )}
+                    </DropdownMenuItem>
                   ))}
-                </div>
-              )}
-            </div>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
@@ -150,44 +154,38 @@ export function AppHeader({ title, subtitle, badge, breadcrumbs, actionButton }:
         </button>
 
         {/* User Menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowUserDropdown(!showUserDropdown)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 cursor-pointer"
-            aria-label="User Profile Menu"
-            aria-expanded={showUserDropdown}
-          >
-            <div className="h-7 w-7 rounded-full bg-teal-600 text-white font-bold text-xs flex items-center justify-center">
-              {user?.displayName ? user.displayName.slice(0, 1) : "M"}
-            </div>
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-200 hidden xl:inline-block">
-              {user?.displayName || "Moses Wetangula"}
-            </span>
-          </button>
-
-          {showUserDropdown && (
-            <div className="absolute top-full mt-1.5 end-0 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 py-1 z-50">
-              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                  {user?.displayName || "Moses Wetangula"}
-                </p>
-                <p className="text-[10px] text-slate-400 truncate">
-                  {user?.email || "moses@redco.academy"}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  logout();
-                  setShowUserDropdown(false);
-                }}
-                className="w-full text-start px-3 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 transition-colors cursor-pointer"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                Sign Out
-              </button>
-            </div>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="ghost" className="h-9 gap-2 px-1.5" aria-label="Account menu" />}>
+            <Avatar size="sm">
+              <AvatarFallback className="bg-teal-600 text-[10px] font-bold text-white">
+                {initialsOf(user?.displayName ?? "")}
+              </AvatarFallback>
+            </Avatar>
+            <span className="hidden text-xs font-medium xl:inline-block">{user?.displayName}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-60">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="flex flex-col gap-0.5">
+                <span className="truncate text-sm font-semibold text-foreground">{user?.displayName}</span>
+                {user?.email && <span className="truncate font-normal">{user.email}</span>}
+                {activeTenant && (
+                  <span className="truncate font-normal capitalize">
+                    {activeTenant.name} · {user?.roles.join(", ")}
+                  </span>
+                )}
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => signOut()}>
+                <LogOut /> Sign out
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={signOutAllDevices}>
+                <MonitorSmartphone /> Sign out of all devices
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

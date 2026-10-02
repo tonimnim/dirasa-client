@@ -1,184 +1,185 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { MeResponse, TenantSummary } from "@/types/api";
-import { getMe, switchTenant as apiSwitchTenant, logout as apiLogout } from "@/lib/api/auth";
-import { DEMO_ACCOUNTS, DemoRoleKey } from "./demoUsers";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { MembershipSummary, MeResponse, TenantSummary } from "@/types/api";
+import { DirasaApiError, onSessionEvent, refreshAccessToken } from "@/lib/api/client";
+import {
+  getMe,
+  login as apiLogin,
+  logout as apiLogout,
+  logoutAll as apiLogoutAll,
+  switchTenant as apiSwitchTenant,
+} from "@/lib/api/auth";
+
+/**
+ * - `loading`: restoring the session on page load.
+ * - `unavailable`: the API could not answer (outage, throttling); the session may still be valid.
+ */
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated" | "unavailable";
 
 interface AuthContextValue {
+  status: AuthStatus;
   user: MeResponse | null;
   activeTenant: TenantSummary | null;
   roles: string[];
   permissions: string[];
-  isLoading: boolean;
-  error: string | null;
+  /** Schools the user can switch to (active memberships). */
+  schools: MembershipSummary[];
+  /** Signed in with schools available but none active: show the school picker. */
+  needsSchoolSelection: boolean;
+  /** Why the status is `unavailable`. */
+  error: DirasaApiError | null;
   hasPermission: (permissionKey: string) => boolean;
   hasAnyPermission: (...keys: string[]) => boolean;
+  signIn: (identifier: string, password: string, rememberMe: boolean) => Promise<void>;
+  signOut: () => Promise<void>;
+  signOutEverywhere: () => Promise<void>;
   switchSchool: (tenantId: string) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  setMockUser: (user: MeResponse | null) => void;
-  loginAsDemo: (roleKey: DemoRoleKey) => void;
+  reloadProfile: () => Promise<void>;
+  /** Restores the session again after `unavailable`. */
+  retry: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const DEMO_STORAGE_KEY = "dirasa_demo_user";
+function toApiError(error: unknown): DirasaApiError {
+  return error instanceof DirasaApiError
+    ? error
+    : new DirasaApiError(0, { code: "unknown_error", title: "Something went wrong." });
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<MeResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<DirasaApiError | null>(null);
+  const userRef = useRef<MeResponse | null>(null);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
-  const refreshProfile = useCallback(async () => {
+  const signedOut = useCallback(() => {
+    setUser(null);
+    setError(null);
+    setStatus("unauthenticated");
+  }, []);
+
+  const loadProfile = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
       const profile = await getMe();
       setUser(profile);
-      if (typeof window !== "undefined") {
-        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(profile));
-      }
-    } catch {
-      // Backend unavailable or no session; check localStorage for demo user
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem(DEMO_STORAGE_KEY);
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored) as MeResponse;
-            setUser(parsed);
-            return;
-          } catch {
-            localStorage.removeItem(DEMO_STORAGE_KEY);
-          }
-        }
-      }
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    refreshProfile();
-  }, [refreshProfile]);
-
-  const setMockUser = useCallback((newUser: MeResponse | null) => {
-    setUser(newUser);
-    if (typeof window !== "undefined") {
-      if (newUser) {
-        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newUser));
+      setError(null);
+      setStatus("authenticated");
+    } catch (err) {
+      const apiError = toApiError(err);
+      if (apiError.code === "session_expired") {
+        signedOut();
       } else {
-        localStorage.removeItem(DEMO_STORAGE_KEY);
+        setError(apiError);
+        setStatus("unavailable");
       }
     }
-  }, []);
+  }, [signedOut]);
 
-  const loginAsDemo = useCallback((roleKey: DemoRoleKey) => {
-    const demoInfo = DEMO_ACCOUNTS[roleKey];
-    if (demoInfo) {
-      setMockUser(demoInfo.profile);
-    }
-  }, [setMockUser]);
-
-  const hasPermission = useCallback(
-    (permissionKey: string): boolean => {
-      if (!user) return false;
-      // Admins and Principals have full access
-      if (
-        user.roles.includes("SchoolAdmin") ||
-        user.roles.includes("Principal") ||
-        user.permissions.includes("*")
-      ) {
-        return true;
-      }
-      // Normalize both dot and colon notation (e.g. students.read vs students:read)
-      const dotNotation = permissionKey.replace(/:/g, ".");
-      const colonNotation = permissionKey.replace(/\./g, ":");
-
-      return user.permissions.some(
-        (p) =>
-          p === permissionKey ||
-          p === dotNotation ||
-          p === colonNotation
-      );
-    },
-    [user]
+  // The refresh cookie is the only thing that survives a page load.
+  const restore = useCallback(
+    () =>
+      refreshAccessToken(null).then(
+        (token) => (token ? loadProfile() : signedOut()),
+        (err: unknown) => {
+          setError(toApiError(err));
+          setStatus("unavailable");
+        }
+      ),
+    [loadProfile, signedOut]
   );
 
-  const hasAnyPermission = useCallback(
-    (...keys: string[]): boolean => {
-      if (!user) return false;
-      return keys.some((k) => hasPermission(k));
-    },
-    [user, hasPermission]
-  );
+  // Status starts as "loading".
+  useEffect(() => {
+    restore();
+  }, [restore]);
 
-  const switchSchool = useCallback(
-    async (tenantId: string) => {
-      setIsLoading(true);
-      try {
-        await apiSwitchTenant(tenantId);
-        await refreshProfile();
-      } catch {
-        // If API switch fails or in demo mode, update local user's active tenant
-        if (user && user.memberships) {
-          const targetMembership = user.memberships.find((m) => m.tenantId === tenantId);
-          if (targetMembership) {
-            const updatedUser: MeResponse = {
-              ...user,
-              activeTenant: {
-                id: targetMembership.tenantId,
-                name: targetMembership.schoolName,
-                slug: targetMembership.schoolSlug,
-              },
-            };
-            setMockUser(updatedUser);
+  const retry = useCallback(async () => {
+    setStatus("loading");
+    await restore();
+  }, [restore]);
+
+  useEffect(
+    () =>
+      onSessionEvent((event) => {
+        if (event.type === "signed-out") {
+          signedOut();
+        } else if (event.type === "profile-stale") {
+          loadProfile();
+        } else if (event.fromOtherTab) {
+          // Another tab signed in, or switched school: follow it.
+          const current = userRef.current;
+          if (!current || (current.activeTenant?.id ?? null) !== event.tenantId) {
+            loadProfile();
           }
         }
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [user, refreshProfile, setMockUser]
+      }),
+    [loadProfile, signedOut]
   );
 
-  const logout = useCallback(async () => {
-    setIsLoading(true);
+  const signIn = useCallback(
+    async (identifier: string, password: string, rememberMe: boolean) => {
+      await apiLogin({ identifier, password, rememberMe });
+      await loadProfile();
+    },
+    [loadProfile]
+  );
+
+  const signOut = useCallback(async () => {
     try {
       await apiLogout();
     } catch {
-      // Ignore API errors on logout
-    } finally {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem(DEMO_STORAGE_KEY);
-      }
-      setUser(null);
-      setIsLoading(false);
+      // The local session is cleared regardless; the refresh cookie expires on its own.
     }
-  }, []);
+    signedOut();
+  }, [signedOut]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        activeTenant: user?.activeTenant ?? null,
-        roles: user?.roles ?? [],
-        permissions: user?.permissions ?? [],
-        isLoading,
-        error,
-        hasPermission,
-        hasAnyPermission,
-        switchSchool,
-        logout,
-        refreshProfile,
-        setMockUser,
-        loginAsDemo,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const signOutEverywhere = useCallback(async () => {
+    try {
+      await apiLogoutAll();
+    } catch {
+      // As above: never leave the user signed in locally because the API failed.
+    }
+    signedOut();
+  }, [signedOut]);
+
+  const switchSchool = useCallback(
+    async (tenantId: string) => {
+      await apiSwitchTenant(tenantId);
+      await loadProfile();
+    },
+    [loadProfile]
   );
+
+  const value = useMemo<AuthContextValue>(() => {
+    const permissions = user?.permissions ?? [];
+    const schools = user?.memberships.filter((m) => m.status === "active") ?? [];
+    const hasPermission = (key: string) => permissions.includes(key);
+    return {
+      status,
+      user,
+      activeTenant: user?.activeTenant ?? null,
+      roles: user?.roles ?? [],
+      permissions,
+      schools,
+      needsSchoolSelection: status === "authenticated" && !user?.activeTenant && schools.length > 0,
+      error,
+      hasPermission,
+      hasAnyPermission: (...keys: string[]) => keys.some(hasPermission),
+      signIn,
+      signOut,
+      signOutEverywhere,
+      switchSchool,
+      reloadProfile: loadProfile,
+      retry,
+    };
+  }, [status, user, error, signIn, signOut, signOutEverywhere, switchSchool, loadProfile, retry]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

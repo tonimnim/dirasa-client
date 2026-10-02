@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Badge } from "@/components/legacy-ui/Badge";
 import { INITIAL_STUDENTS } from "../../students/page";
 import {
   ChevronLeft,
@@ -105,7 +105,7 @@ export default function NewFeeInvoicePage() {
               <ChevronLeft className="h-4 w-4" />
             </Link>
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Link href="/" className="hover:text-slate-700">Home</Link>
+              <Link href="/dashboard" className="hover:text-slate-700">Home</Link>
               <span>/</span>
               <Link href="/fees" className="hover:text-slate-700">Fees & Invoicing</Link>
               <span>/</span>

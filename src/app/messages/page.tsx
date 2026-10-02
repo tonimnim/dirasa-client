@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/legacy-ui/Button";
 import {
   Mail,
   Search,

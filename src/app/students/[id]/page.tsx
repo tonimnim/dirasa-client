@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Badge } from "@/components/legacy-ui/Badge";
 import { INITIAL_STUDENTS, StudentProfile } from "../page";
 import {
   ChevronLeft,
@@ -90,7 +90,7 @@ export default function StudentProfilePage() {
           subtitle={`${student.admissionNumber} • ${student.classSection}`}
           badge={student.status}
           breadcrumbs={[
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "Students", href: "/students" },
             { label: student.name, current: true },
           ]}
