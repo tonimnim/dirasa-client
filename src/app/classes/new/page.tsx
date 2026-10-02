@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/legacy-ui/Button";
 import {
   ChevronLeft,
   GraduationCap,
@@ -64,7 +64,7 @@ export default function NewClassPage() {
               <ChevronLeft className="h-4 w-4" />
             </Link>
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Link href="/" className="hover:text-slate-700">Home</Link>
+              <Link href="/dashboard" className="hover:text-slate-700">Home</Link>
               <span>/</span>
               <Link href="/classes" className="hover:text-slate-700">Classes</Link>
               <span>/</span>

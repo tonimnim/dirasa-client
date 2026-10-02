@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Badge } from "@/components/legacy-ui/Badge";
 import { INITIAL_TEACHERS, TeacherItem } from "../page";
 import {
   ChevronLeft,
@@ -100,7 +100,7 @@ export default function TeacherProfilePage() {
           subtitle={`${teacher.department} • Room: ${teacher.room || "Building B"}`}
           badge={teacher.status === "Active" ? "Active Faculty" : "On Leave"}
           breadcrumbs={[
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "Teachers", href: "/teachers" },
             { label: teacher.name, current: true },
           ]}

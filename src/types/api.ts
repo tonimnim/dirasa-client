@@ -32,25 +32,18 @@ export interface PageQuery {
   pageSize?: number;
 }
 
-// --- Auth & Identity ---
+// --- Auth & Identity (docs/api/auth.openapi.json in the backend repo) ---
 export type ClientChannel = "web" | "mobile";
 
 export interface LoginRequest {
+  /** Email address or user name. */
   identifier: string;
   password: string;
   clientType: ClientChannel;
+  /** Web only: keep the refresh cookie after the browser closes. */
   rememberMe?: boolean;
   tenantId?: string;
   deviceName?: string;
-}
-
-export interface TokenResponse {
-  accessToken: string;
-  expiresIn: number;
-  tokenType: string;
-  tenantId?: string;
-  roles: string[];
-  permissions: string[];
 }
 
 export interface TenantSummary {
@@ -59,25 +52,50 @@ export interface TenantSummary {
   slug: string;
 }
 
+/** Returned by login, refresh, switch-tenant and change password. Web clients get the refresh token as a cookie. */
+export interface TokenResponse {
+  accessToken: string;
+  tokenType: "Bearer";
+  /** ISO date-time; refresh shortly before. */
+  expiresAt: string;
+  tenant: TenantSummary | null;
+  tenants: TenantSummary[];
+  /** True when no school is active but the user has some: show a picker. */
+  requiresTenantSelection: boolean;
+}
+
+export type MembershipStatus = "invited" | "active" | "suspended" | "left";
+
 export interface MembershipSummary {
-  membershipId: string;
   tenantId: string;
-  schoolName: string;
-  schoolSlug: string;
+  name: string;
+  slug: string;
   roles: string[];
-  status: "Active" | "Suspended";
+  status: MembershipStatus;
 }
 
 export interface MeResponse {
   id: string;
   displayName: string;
-  email?: string;
-  preferredCulture?: string;
+  email: string | null;
+  preferredCulture: string | null;
+  /** e.g. `super_admin`; web sessions only. */
   platformRoles: string[];
-  activeTenant?: TenantSummary | null;
+  activeTenant: TenantSummary | null;
+  /** Tenant role keys in the active school, e.g. `manager`. */
   roles: string[];
+  /** Effective permission keys, e.g. `students.read`. */
   permissions: string[];
   memberships: MembershipSummary[];
+}
+
+export interface SessionResponse {
+  id: string;
+  clientType: ClientChannel;
+  deviceName: string | null;
+  createdAt: string;
+  lastUsedAt: string;
+  current: boolean;
 }
 
 // --- School Profile ---

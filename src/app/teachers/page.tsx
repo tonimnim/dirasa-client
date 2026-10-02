@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
+import { Badge } from "@/components/legacy-ui/Badge";
 import {
   UserCheck,
   Search,
@@ -218,7 +218,7 @@ export default function TeachersPage() {
           title="Teachers & Faculty"
           subtitle={`${teachers.length} Faculty members • Teaching assignments & timetable allocations`}
           badge="10 Faculty"
-          breadcrumbs={[{ label: "Home", href: "/" }, { label: "Teachers" }]}
+          breadcrumbs={[{ label: "Home", href: "/dashboard" }, { label: "Teachers" }]}
           actionButton={
             <div className="flex items-center gap-2">
               <Button

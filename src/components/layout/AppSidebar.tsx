@@ -34,7 +34,7 @@ export function AppSidebar() {
   const { user, activeTenant } = useAuth();
 
   const primaryNav = [
-    { title: "Home", href: "/", icon: Home },
+    { title: "Home", href: "/dashboard", icon: Home },
     { title: "Calendar", href: "/calendar", icon: Calendar },
     { type: "spacer" as const },
     { title: "Classes", href: "/classes", icon: GraduationCap },
@@ -81,7 +81,7 @@ export function AppSidebar() {
         >
           <div className="min-w-0">
             <h2 className="text-xs font-bold text-white tracking-wide uppercase truncate group-hover:text-sky-400 transition-colors">
-              {activeTenant?.name || "REDCO ACADEMY"}
+              {activeTenant?.name ?? "No school selected"}
             </h2>
             <p className="text-[11px] text-slate-400 truncate">
               Sep 2026 - Jul 2027
@@ -101,10 +101,7 @@ export function AppSidebar() {
           if (!("title" in item)) return null;
 
           const Icon = item.icon;
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname?.startsWith(item.href)) ||
-            (item.href === "/" && pathname === "/dashboard");
+          const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
 
           return (
             <Link
@@ -189,7 +186,7 @@ export function AppSidebar() {
               <User className="h-4 w-4" />
             </div>
             <span className="text-xs font-medium text-slate-200 truncate max-w-[96px]">
-              {user?.displayName || "moses wetan..."}
+              {user?.displayName}
             </span>
           </div>
           <div className="shrink-0">

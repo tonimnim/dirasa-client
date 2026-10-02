@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/legacy-ui/Card";
+import { Badge } from "@/components/legacy-ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
 import {
   GraduationCap,
   Search,
@@ -466,7 +466,7 @@ export default function StudentsDirectoryPage() {
           subtitle="16 Active Students • Complete SIS profiles, safeguarding, academic records & balances"
           badge={`${students.length} Enrolled`}
           breadcrumbs={[
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "Students", current: true },
           ]}
           actionButton={

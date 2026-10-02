@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/legacy-ui/Card";
+import { Badge } from "@/components/legacy-ui/Badge";
+import { Button } from "@/components/legacy-ui/Button";
 import {
   Megaphone,
   MessageSquare,
