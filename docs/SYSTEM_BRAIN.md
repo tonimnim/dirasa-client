@@ -1,12 +1,14 @@
 # Dirasa Client — Frontend System Brain & Complete Implementation Blueprint
 
+> **Status note (2026-10-03):** This is a product blueprint and includes planned modules; it is not a record of shipped backend endpoints. Use [BACKEND_COVERAGE.md](BACKEND_COVERAGE.md) for implemented integration status and [BACKEND_REQUIREMENTS.md](BACKEND_REQUIREMENTS.md) for APIs still required by the UI.
+
 This document is the engineering knowledge base, domain specification, and step-by-step implementation blueprint for `dirasa-client`, the official web client for the **Dirasa Multi-Tenant School Management System**.
 
 ---
 
 ## 1. Domain Map & Backend Alignment
 
-The backend lives at `/home/crisstratus/dirasa`. It is a Clean Architecture .NET 10 solution using PostgreSQL, EF Core, and ASP.NET Core.
+The backend lives at `/home/chege/dirasa`. It is a Clean Architecture .NET 10 solution using PostgreSQL, EF Core, and ASP.NET Core.
 
 ### 1.1 Architectural Pillars
 
