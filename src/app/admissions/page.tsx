@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 
 // --- Types ---
-export type AdmissionStage =
+type AdmissionStage =
   | "Enquiry"
   | "Applied"
   | "Assessment"
@@ -40,14 +40,14 @@ export type AdmissionStage =
   | "Accepted"
   | "Enrolled";
 
-export interface DocumentVerificationItem {
+interface DocumentVerificationItem {
   id: string;
   name: string;
   status: "Verified" | "Pending" | "Missing";
   fileName?: string;
 }
 
-export interface ApplicantRecord {
+interface ApplicantRecord {
   id: string;
   applicationNumber: string;
   studentName: string;

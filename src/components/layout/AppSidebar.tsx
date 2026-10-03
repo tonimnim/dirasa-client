@@ -23,10 +23,9 @@ import {
   BookOpen,
   FolderOpen,
   Settings,
+  ShieldCheck,
   HeartHandshake,
   ChevronRight,
-  MoreHorizontal,
-  Plus,
 } from "lucide-react";
 
 export function AppSidebar() {
@@ -61,6 +60,9 @@ export function AppSidebar() {
   const bottomNav = [
     { title: "School File Center", href: "/files", icon: FolderOpen },
     { title: "Settings", href: "/settings", icon: Settings },
+    ...(user?.platformRoles.includes("super_admin")
+      ? [{ title: "Platform", href: "/platform", icon: ShieldCheck }]
+      : []),
   ];
 
   return (
@@ -84,7 +86,7 @@ export function AppSidebar() {
               {activeTenant?.name ?? "No school selected"}
             </h2>
             <p className="text-[11px] text-slate-400 truncate">
-              Sep 2026 - Jul 2027
+              Active school
             </p>
           </div>
           <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors shrink-0" />

@@ -1,163 +1,67 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Button } from "@/components/legacy-ui/Button";
-import { Badge } from "@/components/legacy-ui/Badge";
-import {
-  FileText,
-  Search,
-  Download,
-  GraduationCap,
-  Calendar,
-  Lock,
-  ChevronRight,
-  ShieldCheck,
-  Archive,
-} from "lucide-react";
+import { useState } from "react";
+import { Download, Plus, RefreshCw, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
+import { AppShell } from "@/components/layout/AppShell";
+import { ResourceEmpty, ResourceError, ResourceLoading } from "@/components/api/ResourceState";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { dataProtectionApi, type SubjectKind } from "@/lib/api/dataProtection";
+import { describeApiError } from "@/lib/api/errors";
+import { useAuth } from "@/lib/auth/context";
+import { useApiResource } from "@/lib/hooks/useApiResource";
 
 export default function RecordsPage() {
-  const [search, setSearch] = useState("");
+  const { activeTenant, hasPermission } = useAuth();
+  const canReadConsents = hasPermission("data_protection.consents.read");
+  const canManageConsents = hasPermission("data_protection.consents.manage");
+  const canExport = hasPermission("data_protection.export");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const kinds = useApiResource(`${activeTenant?.id}:consent-kinds:${canReadConsents}`, () => canReadConsents ? dataProtectionApi.listConsentKinds() : Promise.resolve(null));
 
-  const records = [
-    {
-      id: "rec-1",
-      title: "Permanent Student Cumulative Record (Form 1 - Form 4)",
-      student: "Tariq Mansoor",
-      admissionNumber: "ADM-2024-001",
-      type: "Cumulative Record",
-      status: "Verified",
-      archivedDate: "2026-09-30",
-    },
-    {
-      id: "rec-2",
-      title: "Statutory Health & Immunization Clearance Certificate",
-      student: "Amina Al-Falasi",
-      admissionNumber: "ADM-2024-002",
-      type: "Health Record",
-      status: "Verified",
-      archivedDate: "2026-09-15",
-    },
-    {
-      id: "rec-3",
-      title: "Official High School Leaving Certificate & Transcript",
-      student: "Omar Al-Khatib",
-      admissionNumber: "ADM-2022-045",
-      type: "Graduation Record",
-      status: "Archived",
-      archivedDate: "2026-06-30",
-    },
-    {
-      id: "rec-4",
-      title: "Family Legal Custody & Court Guardianship Order",
-      student: "Fatima Zahra",
-      admissionNumber: "ADM-2023-089",
-      type: "Custody Order",
-      status: "Confidential",
-      archivedDate: "2026-08-20",
-    },
-  ];
+  const createKind = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); const form = new FormData(event.currentTarget); setPending(true); setError(null);
+    try {
+      await dataProtectionApi.createConsentKind({ code: String(form.get("code")), name: { en: String(form.get("name")) }, statement: { en: String(form.get("statement")) }, allowStudentDecision: form.get("allowStudentDecision") === "on" });
+      event.currentTarget.reset(); toast.success("Consent purpose created"); await kinds.reload();
+    } catch (cause) { setError(describeApiError(cause)); }
+    finally { setPending(false); }
+  };
 
-  const filtered = records.filter(
-    (r) =>
-      r.title.toLowerCase().includes(search.toLowerCase()) ||
-      r.student.toLowerCase().includes(search.toLowerCase()) ||
-      r.admissionNumber.toLowerCase().includes(search.toLowerCase())
-  );
+  const seed = async () => {
+    setPending(true); setError(null);
+    try { const created = await dataProtectionApi.seedConsentKinds(); toast.success(`${created.length} consent purposes added`); await kinds.reload(); }
+    catch (cause) { setError(describeApiError(cause)); }
+    finally { setPending(false); }
+  };
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans">
-      <AppSidebar />
+  const exportSubject = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); const form = new FormData(event.currentTarget); setPending(true); setError(null);
+    try {
+      const result = await dataProtectionApi.exportSubject(form.get("kind") as SubjectKind, String(form.get("subjectId")));
+      const url = URL.createObjectURL(new Blob([JSON.stringify(result, null, 2)], { type: "application/json" }));
+      const anchor = document.createElement("a"); anchor.href = url; anchor.download = `dirasa-subject-access-${result.kind}-${result.subjectId}.json`; anchor.click(); URL.revokeObjectURL(url);
+      toast.success("Subject access export generated");
+    } catch (cause) { setError(describeApiError(cause)); }
+    finally { setPending(false); }
+  };
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#fafafa]">
-        {/* Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between gap-4 sticky top-0 z-20 shrink-0">
-          <div>
-            <h1 className="text-xl font-bold text-[#1e3a34]">Official Records Archive</h1>
-            <p className="text-xs text-slate-500">
-              Permanent student registries, legal custody files, and certified transcripts
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="border-slate-200 text-xs">
-              <Archive className="h-4 w-4 mr-1 text-slate-500" /> Export Archive
-            </Button>
-          </div>
-        </header>
-
-        <main className="p-6 max-w-7xl w-full mx-auto space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative max-w-sm w-full">
-              <Search className="h-4 w-4 text-slate-400 absolute start-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search official student records or ID..."
-                className="w-full h-9 ps-9 pe-4 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-              />
-            </div>
-            <span className="text-xs text-slate-500">
-              Showing {filtered.length} permanent records
-            </span>
-          </div>
-
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
-            <table className="w-full text-start text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
-                <tr>
-                  <th className="py-3 px-4 text-start">Record Title</th>
-                  <th className="py-3 px-4 text-start">Student & ID</th>
-                  <th className="py-3 px-4 text-start">Record Type</th>
-                  <th className="py-3 px-4 text-start">Status</th>
-                  <th className="py-3 px-4 text-start">Archived Date</th>
-                  <th className="py-3 px-4 text-end">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filtered.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 flex items-center gap-2.5">
-                      <FileText className="h-4 w-4 text-teal-600 shrink-0" />
-                      <span>{r.title}</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-900">{r.student}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{r.admissionNumber}</div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
-                        {r.type}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Badge
-                        variant={
-                          r.status === "Verified"
-                            ? "success"
-                            : r.status === "Confidential"
-                            ? "danger"
-                            : "default"
-                        }
-                      >
-                        {r.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-500">{r.archivedDate}</td>
-                    <td className="py-3.5 px-4 text-end">
-                      <Button variant="ghost" size="sm" className="h-8 text-teal-700 hover:text-teal-800 text-xs gap-1">
-                        <Download className="h-3.5 w-3.5" /> Open
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+  return <AppShell header={{ title: "Data protection", subtitle: "Consent purposes and audited subject access exports" }}>
+    {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+    {!canReadConsents && !canExport ? <ResourceEmpty title="No data-protection access" description="Your current school permissions do not allow consent administration or subject access exports." /> : <div className="grid gap-6 xl:grid-cols-2">
+      {canReadConsents && <Card><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="flex items-center gap-2"><ShieldCheck className="size-5" /> Consent purposes</CardTitle><CardDescription>Versioned wording used when recording student consent.</CardDescription></div>{canManageConsents && <Button variant="outline" size="sm" disabled={pending} onClick={() => void seed()}><RefreshCw /> Add market defaults</Button>}</div></CardHeader><CardContent className="space-y-5">
+        {canManageConsents && <form onSubmit={createKind} className="grid gap-3 sm:grid-cols-2"><Field name="code" label="Stable code" required placeholder="photos-media" /><Field name="name" label="Display name" required placeholder="Photos and media" /><div className="sm:col-span-2"><Field name="statement" label="Consent statement" required placeholder="Allow the school to use photographs…" /></div><label className="flex items-center gap-2 text-sm"><input type="checkbox" name="allowStudentDecision" /> Student may decide</label><div className="flex justify-end"><Button type="submit" disabled={pending}><Plus /> Add purpose</Button></div></form>}
+        {kinds.loading ? <ResourceLoading /> : kinds.error ? <ResourceError error={kinds.error} retry={() => void kinds.reload()} /> : kinds.data?.items.length ? <div className="divide-y rounded-lg border">{kinds.data.items.map((kind) => <div key={kind.id} className="p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-medium">{kind.name.en ?? Object.values(kind.name)[0] ?? kind.code}</p><div className="flex gap-2"><Badge variant="outline">Revision {kind.revision}</Badge><Badge variant={kind.isActive ? "default" : "secondary"}>{kind.isActive ? "Active" : "Inactive"}</Badge></div></div><p className="mt-1 text-sm text-muted-foreground">{kind.statement.en ?? Object.values(kind.statement)[0]}</p><p className="mt-2 font-mono text-xs text-muted-foreground">{kind.code}</p></div>)}</div> : <ResourceEmpty title="No consent purposes" description="Add a purpose or seed the defaults for this school's market." />}
+      </CardContent></Card>}
+      {canExport && <Card><CardHeader><CardTitle className="flex items-center gap-2"><Download className="size-5" /> Subject access export</CardTitle><CardDescription>Generate an audited JSON export for one person in this school.</CardDescription></CardHeader><CardContent><form onSubmit={exportSubject} className="space-y-4"><div className="space-y-2"><Label htmlFor="kind">Record type</Label><select id="kind" name="kind" className="h-9 w-full rounded-lg border bg-background px-3 text-sm"><option value="student">Student</option><option value="guardian">Guardian</option><option value="staff">Staff</option><option value="member">School member</option></select></div><Field name="subjectId" label="Record ID" required placeholder="UUID" /><Alert><ShieldCheck /><AlertDescription>The server records this request and builds the export inside a repeatable-read snapshot.</AlertDescription></Alert><Button type="submit" disabled={pending}><Download /> Generate and download JSON</Button></form></CardContent></Card>}
+    </div>}
+  </AppShell>;
 }
+
+function Field({ name, label, ...props }: { name: string; label: string } & React.ComponentProps<typeof Input>) { return <div className="space-y-2"><Label htmlFor={name}>{label}</Label><Input id={name} name={name} {...props} /></div>; }

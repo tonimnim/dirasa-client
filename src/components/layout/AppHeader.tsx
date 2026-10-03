@@ -107,19 +107,8 @@ export function AppHeader({ title, subtitle, badge, breadcrumbs, actionButton }:
         )}
       </div>
 
-      {/* Right: DreamClass Trial Banner + Actions + Theme + Menus */}
+      {/* Right: Actions + Theme + Menus */}
       <div className="flex items-center gap-3 shrink-0">
-        {/* DreamClass Free Trial Banner */}
-        <div className="hidden lg:flex items-center gap-2.5 bg-[#1e3a8a] text-white text-xs px-3.5 py-1.5 rounded-md font-medium shadow-sm">
-          <span>You have 30 days left in your free trial.</span>
-          <button className="bg-[#172554] hover:bg-[#0f172a] text-white px-2 py-0.5 rounded text-[11px] font-semibold transition-colors cursor-pointer">
-            Upgrade
-          </button>
-          <button className="bg-[#10b981] hover:bg-[#059669] text-white px-2.5 py-0.5 rounded text-[11px] font-bold transition-colors cursor-pointer">
-            Book Demo!
-          </button>
-        </div>
-
         {/* Custom Action Button */}
         {actionButton && <div>{actionButton}</div>}
 
@@ -150,7 +139,6 @@ export function AppHeader({ title, subtitle, badge, breadcrumbs, actionButton }:
           aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 end-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
         </button>
 
         {/* User Menu */}

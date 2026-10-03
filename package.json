@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "api:generate": "openapi-typescript ../dirasa/docs/api/auth.openapi.json -o src/types/generated/auth.ts && openapi-typescript ../dirasa/docs/api/school.openapi.json -o src/types/generated/school.ts && openapi-typescript ../dirasa/docs/api/platform.openapi.json -o src/types/generated/platform.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
+    "openapi-typescript": "^7.10.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

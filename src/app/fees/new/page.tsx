@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/legacy-ui/Button";
 import { Badge } from "@/components/legacy-ui/Badge";
-import { INITIAL_STUDENTS } from "../../students/page";
 import {
   ChevronLeft,
   Receipt,
@@ -24,6 +23,11 @@ interface FeeItem {
   category: "Tuition" | "Lab" | "Activity" | "Materials" | "Transport" | "Meals";
   amount: number;
 }
+
+const INITIAL_STUDENTS = [
+  { id: "prototype-student-1", name: "Mason Harrington", classSection: "Grade 7 - Blue", guardians: [{ name: "Robert Harrington" }] },
+  { id: "prototype-student-2", name: "Amina Al-Falasi", classSection: "Grade 7 - Gold", guardians: [{ name: "Mariam Al-Falasi" }] },
+];
 
 export default function NewFeeInvoicePage() {
   const router = useRouter();

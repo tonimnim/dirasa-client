@@ -20,7 +20,8 @@ export function ThemeToggle({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Avoid hydration mismatch by rendering a matching placeholder skeleton before mount

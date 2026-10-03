@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 
 // --- Country Grading Scales Definition ---
-export interface GradingScale {
+interface GradingScale {
   id: string;
   name: string;
   country: string;
@@ -37,7 +37,7 @@ export interface GradingScale {
   evaluate: (percentage: number) => { grade: string; remark: string; badgeVariant: "success" | "info" | "warning" | "danger" | "default" };
 }
 
-export const GRADING_SCALES: GradingScale[] = [
+const GRADING_SCALES: GradingScale[] = [
   {
     id: "gcse",
     name: "GCSE 9-1",
