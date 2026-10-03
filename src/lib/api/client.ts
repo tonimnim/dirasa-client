@@ -10,6 +10,8 @@ const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "")
 const REFRESH_AHEAD_MS = 60_000;
 /** An access token closer than this to expiry is refreshed before a request rather than sent. */
 const MIN_TOKEN_VALIDITY_MS = 30_000;
+const MAX_RETRIES = 3;
+const MAX_AUTOMATIC_RETRY_AFTER_SECONDS = 60;
 
 export class DirasaApiError extends Error {
   public status: number;
@@ -175,6 +177,13 @@ export interface ApiRequestOptions extends RequestInit {
    * `X-Dirasa-Client: web` and include credentials so the browser stores and sends the refresh cookie.
    */
   webClient?: boolean;
+  /**
+   * Adds a stable idempotency key for this user action. `true` creates a UUID once and keeps it across retries;
+   * a string lets a persisted pending action reuse its original key after an app restart.
+   */
+  idempotencyKey?: true | string;
+  /** Retry pre-commit 429/503 responses and network failures according to the API contract (default true). */
+  retry?: boolean;
 }
 
 /**
@@ -182,14 +191,19 @@ export interface ApiRequestOptions extends RequestInit {
  * ProblemDetails body (`network_error` when the API cannot be reached).
  */
 export async function apiClient<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { auth = true, webClient = false, ...init } = options;
+  const { auth = true, webClient = false, idempotencyKey, retry = true, ...requestInit } = options;
+  const headers = new Headers(requestInit.headers);
+  if (idempotencyKey && !headers.has("Idempotency-Key")) {
+    headers.set("Idempotency-Key", idempotencyKey === true ? crypto.randomUUID() : idempotencyKey);
+  }
+  const init: RequestInit = { ...requestInit, headers };
 
   let token = auth ? await getValidAccessToken() : null;
   if (auth && !token) {
     throw new DirasaApiError(401, { status: 401, code: "session_expired", title: "Your session has ended." });
   }
 
-  let response = await send(endpoint, init, { token, webClient });
+  let response = await sendWithRetry(endpoint, init, { token, webClient }, retry);
 
   if (auth && response.status === 401) {
     const problem = await readProblem(response.clone());
@@ -199,7 +213,7 @@ export async function apiClient<T>(endpoint: string, options: ApiRequestOptions 
       if (!token) {
         throw new DirasaApiError(401, { status: 401, code: "session_expired", title: "Your session has ended." });
       }
-      response = await send(endpoint, init, { token, webClient });
+      response = await sendWithRetry(endpoint, init, { token, webClient }, retry);
     }
   }
 
@@ -213,6 +227,53 @@ export async function apiClient<T>(endpoint: string, options: ApiRequestOptions 
 
   const text = await response.text();
   return (text ? JSON.parse(text) : undefined) as T;
+}
+
+async function sendWithRetry(
+  endpoint: string,
+  init: RequestInit,
+  context: { token: string | null; webClient: boolean },
+  enabled: boolean
+): Promise<Response> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      const response = await send(endpoint, init, context);
+      if (!enabled || attempt >= MAX_RETRIES || (response.status !== 429 && response.status !== 503)) {
+        return response;
+      }
+
+      const headerDelay = retryAfter(response);
+      if (headerDelay !== null && headerDelay > MAX_AUTOMATIC_RETRY_AFTER_SECONDS) return response;
+      const baseDelay = headerDelay ?? Math.min(2 ** attempt, MAX_AUTOMATIC_RETRY_AFTER_SECONDS);
+      await waitWithJitter(baseDelay, init.signal);
+    } catch (error) {
+      if (
+        !enabled ||
+        attempt >= MAX_RETRIES ||
+        init.signal?.aborted ||
+        !(error instanceof DirasaApiError) ||
+        error.code !== "network_error"
+      ) {
+        throw error;
+      }
+      await waitWithJitter(Math.min(2 ** attempt, MAX_AUTOMATIC_RETRY_AFTER_SECONDS), init.signal);
+    }
+  }
+}
+
+function waitWithJitter(seconds: number, signal?: AbortSignal | null): Promise<void> {
+  const delay = Math.max(250, seconds * 1_000 * (1 + Math.random() * 0.2));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, delay);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason ?? new DOMException("The request was aborted.", "AbortError"));
+      },
+      { once: true }
+    );
+  });
 }
 
 async function send(
