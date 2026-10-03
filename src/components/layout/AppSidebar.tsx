@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/context";
+import { dashboardAudience } from "@/lib/dashboard/audience";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import {
   Home,
@@ -13,52 +14,36 @@ import {
   User,
   Users,
   UserCheck,
-  CalendarCheck,
-  FileCheck,
-  CreditCard,
-  FileText,
-  Mail,
-  ArrowUpRight,
-  BarChart3,
   BookOpen,
-  FolderOpen,
   Settings,
   ShieldCheck,
-  HeartHandshake,
   ChevronRight,
 } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user, activeTenant } = useAuth();
+  const { user, activeTenant, hasPermission, roles } = useAuth();
+  const isMobileRole = dashboardAudience(roles, user?.permissions ?? [], user?.platformRoles, Boolean(activeTenant)) === "mobile";
+  const isSchoolLeader = roles.some((role) => ["manager", "deputy", "owner", "director", "principal"].includes(role));
 
   const primaryNav = [
     { title: "Home", href: "/dashboard", icon: Home },
-    { title: "Calendar", href: "/calendar", icon: Calendar },
+    ...(hasPermission("academics.read") ? [{ title: "Calendar", href: "/calendar", icon: Calendar }] : []),
     { type: "spacer" as const },
-    { title: "Classes", href: "/classes", icon: GraduationCap },
+    ...(hasPermission("academics.read") && !isMobileRole ? [{ title: "Classes", href: "/classes", icon: GraduationCap }] : []),
     { type: "spacer" as const },
-    { title: "Students", href: "/students", icon: User },
-    { title: "Teachers", href: "/teachers", icon: UserCheck },
-    { title: "Families", href: "/families", icon: Users },
-    { type: "spacer" as const },
-    { title: "Attendance", href: "/attendance", icon: CalendarCheck },
-    { title: "Grading", href: "/grading", icon: FileCheck },
-    { title: "Fees & Invoicing", href: "/fees", icon: CreditCard },
-    { title: "Admissions & Forms", href: "/admissions", icon: FileText },
-    { title: "My Messages", href: "/messages", icon: Mail },
-    { title: "Communication", href: "/communication", icon: ArrowUpRight },
-    { title: "Reports", href: "/reports", icon: BarChart3 },
+    ...(hasPermission("students.read") && !isMobileRole ? [{ title: "Students", href: "/students", icon: User }] : []),
+    ...(hasPermission("staff.read") && !isMobileRole ? [{ title: "Staff", href: "/staff", icon: UserCheck }] : []),
+    ...(hasPermission("guardians.read") && !isMobileRole ? [{ title: "Guardians", href: "/guardians", icon: Users }] : []),
+    ...(hasPermission("enrolment.read") && !isMobileRole ? [{ title: "Enrolment", href: "/enrolment", icon: BookOpen }] : []),
   ];
 
   const mySchoolNav = [
-    { title: "Curriculum", href: "/curriculum", icon: BookOpen },
-    { title: "Records", href: "/records", icon: Users, hasArrow: true },
-    { title: "Donations", href: "/donations", icon: HeartHandshake },
+    ...(hasPermission("academics.read") && isSchoolLeader ? [{ title: "Academics", href: "/academics", icon: BookOpen }] : []),
+    ...((hasPermission("data_protection.export") || hasPermission("data_protection.consents.read")) && !isMobileRole ? [{ title: "Data protection", href: "/records", icon: Users, hasArrow: true }] : []),
   ];
 
   const bottomNav = [
-    { title: "School File Center", href: "/files", icon: FolderOpen },
     { title: "Settings", href: "/settings", icon: Settings },
     ...(user?.platformRoles.includes("super_admin")
       ? [{ title: "Platform", href: "/platform", icon: ShieldCheck }]
@@ -123,11 +108,11 @@ export function AppSidebar() {
         })}
 
         {/* Section: MY SCHOOL */}
-        <div className="pt-4 pb-1 px-3">
+        {mySchoolNav.length > 0 && <div className="pt-4 pb-1 px-3">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
             MY SCHOOL
           </span>
-        </div>
+        </div>}
 
         {mySchoolNav.map((item) => {
           const Icon = item.icon;
