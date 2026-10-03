@@ -4,6 +4,40 @@ Updated: 2026-10-03
 
 This file is the handoff from `dirasa-client` to the backend. It lists product flows already represented by client routes but not exposed by the checked-in backend API. It is intentionally separate from `BACKEND_COVERAGE.md`: an item here is a requirement, not a working integration.
 
+## School web dashboards and role model
+
+The web app now routes users to distinct leadership, operations, teaching, finance, and non-teaching staff home views. Parent features belong primarily in a future mobile app. A dedicated student dashboard is out of scope for now. The current backend has only `manager`, `teacher`, `staff`, `parent`, and `student` school roles; `manager` can switch between leadership and operations views. The other new role names below are client-ready placeholders, **not** roles the backend currently issues.
+
+| Audience | Web experience | Existing backend data | Backend work needed |
+| --- | --- | --- | --- |
+| Owner / director / principal | School-wide overview, strategic indicators, drill-down to permitted records | Managers can read school-wide student, staff, class, enrolment and calendar data | Define `owner`, `director`, `principal` role keys or publish a single stable leadership capability; issue those roles in `/api/v1/me`, invitation and membership flows; return explicitly scoped dashboard summaries and later financial indicators |
+| Manager / deputy | Daily operations, class setup warnings, placements, staff and calendar | `manager` has school-wide access; class overviews and active enrolments exist | Define `deputy` role and its bounded permissions; provide a school-wide, paged actionable exception feed instead of checking the first few sections |
+| Teacher | Own assigned classes and subjects, student rosters and records | `GET /api/v1/school/teaching/mine`, section/subject rosters, assigned-class student scope | Ensure a staff account is linked on invitation/onboarding; provide an assignment-aware teacher summary and eventually attendance, assessments, timetable and pastoral tasks |
+| Finance / bursar / accountant | Billing, payments, balances, reconciliation | No finance endpoints or finance-specific role; `staff` is self-scoped | Define finance role/capability and permissions; ship the finance domain and summary endpoints below |
+| Other non-teaching staff | Own staff record and school calendar | `staff` with `staff.read` Self and `academics.read` | Provide `GET /api/v1/school/staff/me` and, when applicable, role-scoped schedules, leave, tasks and payslip history |
+| Parent / guardian | Future mobile app | `parent` and linked-child access exist | Provide mobile-specific linked-children home data and push notifications; preserve safeguarding restrictions |
+| Student | No dedicated dashboard this phase | Student role and self access exist | No student dashboard endpoint needed now |
+
+### Role and authorization contract
+
+- Keep tenant roles scoped to the active school. Return effective role keys and permission keys from `GET /api/v1/me` after login and school switching; role changes must refresh or invalidate sessions promptly.
+- Establish a documented precedence or selectable workspace for accounts holding several roles (for example, teacher plus finance, or manager plus teacher). Return capabilities if role keys alone are insufficient. The client may choose presentation, but every endpoint must independently enforce scope.
+- Define grants and data scopes for `owner`/`director`/`principal`, `deputy`, and `finance` (or equivalent stable backend role keys). Leadership should get read-only school-wide indicators by default; manager/deputy operational writes and finance payment authority must be explicit, separable grants.
+- Distinguish `finance.read`, billing write, payment entry, refund, reconciliation and export rights; require stronger approval/audit rules for reversals, refunds and sensitive compensation. A finance role must not automatically gain all student medical, safeguarding, or HR data.
+- Non-teaching employees may need department-specific roles such as receptionist, librarian, transport, maintenance or HR. Return their allowed modules/tasks as capabilities rather than granting every `staff` member access to all departments.
+- Keep teacher student access tied to dated section/subject assignments; subject-only teachers must receive their subject roster. On assignment end or school switch, revoke access to former pupils. Parent linked-child scope must honor custody/no-contact restrictions.
+
+### Dashboard read contracts
+
+- Provide a `GET /api/v1/school/dashboard` (or separate audience endpoints) with an explicit `asOf` school-local timestamp, academic-year identifier, scope, and only indicators authorized for the caller. The client currently performs multiple list calls for leadership totals and a bounded class preview because this endpoint does not exist.
+- Leadership: active/current students, staff by teaching/non-teaching category, class sections, active enrolments, enrolment trend by period, and actionable operational/academic/finance summaries. Each metric needs a definition and drill-down filter; do not blend all-year class counts with current-year enrolment counts without labels.
+- Operations: total unresolved class/teacher/subject/placement setup warnings, affected section IDs, urgency, date, and a paged list with stable filters. Include attendance/assessment/finance exceptions only once those modules exist.
+- Teacher: current assignment counts, unique assigned-pupil count, today’s timetable and tasks, attendance register status, grading items due, and a cursor/paged view of own rosters. Preserve section versus class-subject association and effective dates.
+- Finance: invoices due/overdue, amount outstanding, receipts today, unapplied payments, failed payment callbacks and unreconciled transactions, all with exact decimal amounts, ISO currency, date range, and authorized drill-down identifiers.
+- Non-teaching staff: self record, department, shifts, assigned tasks, leave balance/status and own payslips only where those modules exist. A dedicated `staff/me` response should identify the linked record directly; relying on a paged `staff` search is ambiguous.
+- Parent mobile: linked children, day/attendance status, balances or invoices payable, messages/announcements and consent actions, scoped separately per verified guardian link. Do not build the parent experience as a web dashboard requirement.
+- Support partial/empty states with explicit feature availability; counts must be computed by backend authorization, not filtered from school-wide data in the browser. Document cache freshness, pagination limits, timezone handling and response examples in OpenAPI.
+
 ## Contract rules for every new module
 
 - Publish the endpoints and schemas in the checked-in OpenAPI documents under `../dirasa/docs/api/` before the client integrates them.
@@ -145,7 +179,7 @@ Also needed by the records UI:
 The header currently has a notification affordance and domain pages need reliable counts.
 
 - Notification inbox, unread count, mark read/all read, deep-link target, and realtime or polling cursor.
-- A scoped dashboard summary endpoint for student/staff/enrolment/class counts and current school-day/teaching summary to avoid many parallel list calls.
+- The role-scoped dashboard summary and drill-down endpoints described above, avoiding many parallel list calls.
 - Do not return guessed trial/billing state; expose subscription/trial status only if the platform owns it.
 
 ## Acceptance criteria for a backend handoff

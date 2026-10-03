@@ -13,6 +13,7 @@ Updated: 2026-10-03
 | Academic setup, years, calendar, grades, subjects, classes, templates | `src/lib/api/academics.ts` | academics, calendar, classes | Live core workflows; every endpoint has a typed client wrapper |
 | Enrolment, promotion, rosters | `src/lib/api/enrolment.ts` | enrolment and class detail | Live core workflows; every endpoint has a typed client wrapper |
 | Teaching assignments and class subjects | `src/lib/api/teaching.ts` | dashboard and class/staff detail | Live reads and class-subject generation; every endpoint has a typed client wrapper |
+| Role-based school dashboards | `src/components/dashboard/RoleDashboards.tsx` | leadership, operations, teacher, finance and staff home views | Leadership/operations/teacher/staff use live scoped reads; finance data and new role keys await backend contracts |
 | Platform tenant administration | `src/lib/api/platform.ts` | platform | Live |
 | Data protection | `src/lib/api/dataProtection.ts` | records and student detail | Live through temporary handwritten types; checked-in school OpenAPI still omits these endpoints |
 
