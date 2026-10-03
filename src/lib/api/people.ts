@@ -1,154 +1,145 @@
 import { apiClient } from "./client";
-import {
-  PagedResponse,
-  StudentSummary,
-  StudentDetails,
-  StaffSummary,
-  StaffDetails,
-  CompensationView,
-  GuardianSummary,
-  GuardianDetails,
-  GuardianLinkView,
-  Gender,
-  StudentStatus,
-  StaffCategory,
-  EmploymentStatus,
-} from "@/types/api";
+import { encodePath, jsonBody, withQuery } from "./query";
+import type { components } from "@/types/generated/school";
 
-// --- Students ---
+type Schema = components["schemas"];
+type Version = number | string;
+
+export type StudentSummary = Schema["StudentSummary"];
+export type StudentDetails = Schema["StudentDetails"];
+export type GuardianSummary = Schema["GuardianSummary"];
+export type GuardianDetails = Schema["GuardianDetails"];
+export type GuardianLink = Schema["GuardianLinkView"];
+export type StaffSummary = Schema["StaffSummary"];
+export type StaffDetails = Schema["StaffDetails"];
+export type Compensation = Schema["CompensationView"];
+export type IdentifierScheme = Schema["IdentifierSchemeView"];
+
 export interface StudentListParams {
   search?: string;
-  status?: StudentStatus;
+  status?: Schema["StudentStatus"];
   page?: number;
   pageSize?: number;
 }
 
-export async function listStudents(params?: StudentListParams): Promise<PagedResponse<StudentSummary>> {
-  const query = new URLSearchParams();
-  if (params?.search) query.set("search", params.search);
-  if (params?.status) query.set("status", params.status);
-  if (params?.page) query.set("page", params.page.toString());
-  if (params?.pageSize) query.set("pageSize", params.pageSize.toString());
-
-  const qs = query.toString();
-  return apiClient<PagedResponse<StudentSummary>>(`/api/v1/school/students${qs ? `?${qs}` : ""}`);
-}
-
-export async function getStudent(studentId: string): Promise<StudentDetails> {
-  return apiClient<StudentDetails>(`/api/v1/school/students/${studentId}`);
-}
-
-export async function createStudent(input: {
-  admissionNumber: string;
-  name: { givenName: string; familyName: string; middleNames?: string; preferredName?: string; nativeScriptName?: string };
-  dateOfBirth: string;
-  gender: Gender;
-  admissionDate: string;
-  nationalityCode?: string;
-  homeLanguage?: string;
-}): Promise<StudentDetails> {
-  return apiClient<StudentDetails>("/api/v1/school/students", {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export async function updateStudent(
-  studentId: string,
-  input: {
-    admissionNumber: string;
-    name: { givenName: string; familyName: string; middleNames?: string; preferredName?: string; nativeScriptName?: string };
-    dateOfBirth: string;
-    gender: Gender;
-    nationalityCode?: string;
-    homeLanguage?: string;
-    version: number;
-  }
-): Promise<StudentDetails> {
-  return apiClient<StudentDetails>(`/api/v1/school/students/${studentId}`, {
-    method: "PUT",
-    body: JSON.stringify(input),
-  });
-}
-
-export async function listStudentGuardians(studentId: string): Promise<GuardianLinkView[]> {
-  return apiClient<GuardianLinkView[]>(`/api/v1/school/students/${studentId}/guardians`);
-}
-
-// --- Guardians & Safeguarding Links ---
 export interface GuardianListParams {
   search?: string;
   page?: number;
   pageSize?: number;
 }
 
-export async function listGuardians(params?: GuardianListParams): Promise<PagedResponse<GuardianSummary>> {
-  const query = new URLSearchParams();
-  if (params?.search) query.set("search", params.search);
-  if (params?.page) query.set("page", params.page.toString());
-  if (params?.pageSize) query.set("pageSize", params.pageSize.toString());
-
-  const qs = query.toString();
-  return apiClient<PagedResponse<GuardianSummary>>(`/api/v1/school/guardians${qs ? `?${qs}` : ""}`);
-}
-
-export async function getGuardian(guardianId: string): Promise<GuardianDetails> {
-  return apiClient<GuardianDetails>(`/api/v1/school/guardians/${guardianId}`);
-}
-
-export async function verifyGuardianLink(
-  linkId: string,
-  input: { method: string; notes?: string; version: number }
-): Promise<GuardianLinkView> {
-  return apiClient<GuardianLinkView>(`/api/v1/school/guardian-links/${linkId}/verify`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export async function restrictGuardianLink(
-  linkId: string,
-  input: {
-    noRecordAccess: boolean;
-    noContact: boolean;
-    noCollection: boolean;
-    effectiveFrom?: string;
-    effectiveTo?: string;
-    notes?: string;
-    version: number;
-  }
-): Promise<GuardianLinkView> {
-  return apiClient<GuardianLinkView>(`/api/v1/school/guardian-links/${linkId}/restrict`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-// --- Staff & Payroll ---
 export interface StaffListParams {
   search?: string;
-  category?: StaffCategory;
-  employmentStatus?: EmploymentStatus;
+  category?: Schema["StaffCategory"];
+  employmentStatus?: Schema["EmploymentStatus"];
   page?: number;
   pageSize?: number;
 }
 
-export async function listStaff(params?: StaffListParams): Promise<PagedResponse<StaffSummary>> {
-  const query = new URLSearchParams();
-  if (params?.search) query.set("search", params.search);
-  if (params?.category) query.set("category", params.category);
-  if (params?.employmentStatus) query.set("employmentStatus", params.employmentStatus);
-  if (params?.page) query.set("page", params.page.toString());
-  if (params?.pageSize) query.set("pageSize", params.pageSize.toString());
+export const peopleApi = {
+  identifierSchemes: () => apiClient<IdentifierScheme[]>("/api/v1/school/identifier-schemes"),
 
-  const qs = query.toString();
-  return apiClient<PagedResponse<StaffSummary>>(`/api/v1/school/staff${qs ? `?${qs}` : ""}`);
-}
+  listStudents: (params: StudentListParams = {}) =>
+    apiClient<Schema["PagedResponseOfStudentSummary"]>(withQuery("/api/v1/school/students", params)),
+  getStudent: (studentId: string) => apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}`),
+  createStudent: (input: Schema["CreateStudentInput"]) =>
+    apiClient<StudentDetails>("/api/v1/school/students", {
+      method: "POST", body: jsonBody(input), idempotencyKey: true,
+    }),
+  updateStudent: (studentId: string, input: Schema["UpdateStudentInput"]) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}`, { method: "PUT", body: jsonBody(input) }),
+  withdrawStudent: (studentId: string, input: Schema["StudentLeaveInput"]) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}/withdraw`, { method: "POST", body: jsonBody(input) }),
+  graduateStudent: (studentId: string, input: Schema["StudentLeaveInput"]) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}/graduate`, { method: "POST", body: jsonBody(input) }),
+  reinstateStudent: (studentId: string, version: Version) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}/reinstate`, { method: "POST", body: jsonBody({ version }) }),
+  deleteStudent: (studentId: string, version: Version) =>
+    apiClient<void>(withQuery(`/api/v1/school/students/${encodePath(studentId)}`, { version }), { method: "DELETE" }),
+  addStudentIdentifier: (studentId: string, input: Schema["IdentifierInput"]) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}/identifiers`, {
+      method: "POST", body: jsonBody(input), idempotencyKey: true,
+    }),
+  removeStudentIdentifier: (studentId: string, identifierId: string) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}/identifiers/${encodePath(identifierId)}`, { method: "DELETE" }),
+  linkStudentAccount: (studentId: string, input: Schema["LinkAccountInput"]) =>
+    apiClient<StudentDetails>(`/api/v1/school/students/${encodePath(studentId)}/account-link`, { method: "POST", body: jsonBody(input) }),
+  unlinkStudentAccount: (studentId: string, version: Version) =>
+    apiClient<StudentDetails>(withQuery(`/api/v1/school/students/${encodePath(studentId)}/account-link`, { version }), { method: "DELETE" }),
+  listStudentGuardians: (studentId: string) =>
+    apiClient<GuardianLink[]>(`/api/v1/school/students/${encodePath(studentId)}/guardians`),
 
-export async function getStaffMember(staffMemberId: string): Promise<StaffDetails> {
-  return apiClient<StaffDetails>(`/api/v1/school/staff/${staffMemberId}`);
-}
+  listGuardians: (params: GuardianListParams = {}) =>
+    apiClient<Schema["PagedResponseOfGuardianSummary"]>(withQuery("/api/v1/school/guardians", params)),
+  getGuardian: (guardianId: string) => apiClient<GuardianDetails>(`/api/v1/school/guardians/${encodePath(guardianId)}`),
+  createGuardian: (input: Schema["CreateGuardianInput"]) =>
+    apiClient<GuardianDetails>("/api/v1/school/guardians", { method: "POST", body: jsonBody(input), idempotencyKey: true }),
+  updateGuardian: (guardianId: string, input: Schema["UpdateGuardianInput"]) =>
+    apiClient<GuardianDetails>(`/api/v1/school/guardians/${encodePath(guardianId)}`, { method: "PUT", body: jsonBody(input) }),
+  deleteGuardian: (guardianId: string, version: Version) =>
+    apiClient<void>(withQuery(`/api/v1/school/guardians/${encodePath(guardianId)}`, { version }), { method: "DELETE" }),
+  linkGuardianAccount: (guardianId: string, input: Schema["LinkAccountInput"]) =>
+    apiClient<GuardianDetails>(`/api/v1/school/guardians/${encodePath(guardianId)}/account-link`, { method: "POST", body: jsonBody(input) }),
+  unlinkGuardianAccount: (guardianId: string, version: Version) =>
+    apiClient<GuardianDetails>(withQuery(`/api/v1/school/guardians/${encodePath(guardianId)}/account-link`, { version }), { method: "DELETE" }),
 
-export async function getStaffCompensation(staffMemberId: string): Promise<CompensationView | null> {
-  return apiClient<CompensationView | null>(`/api/v1/school/staff/${staffMemberId}/compensation`);
-}
+  getGuardianLink: (linkId: string) => apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}`),
+  createGuardianLink: (input: Schema["CreateGuardianLinkInput"]) =>
+    apiClient<GuardianLink>("/api/v1/school/guardian-links", { method: "POST", body: jsonBody(input), idempotencyKey: true }),
+  updateGuardianLink: (linkId: string, input: Schema["UpdateGuardianLinkInput"]) =>
+    apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}`, { method: "PUT", body: jsonBody(input) }),
+  verifyGuardianLink: (linkId: string, input: Schema["VerifyGuardianLinkInput"]) =>
+    apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}/verify`, { method: "POST", body: jsonBody(input) }),
+  rejectGuardianLink: (linkId: string, version: Version) =>
+    apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}/reject`, { method: "POST", body: jsonBody({ version }) }),
+  restrictGuardianLink: (linkId: string, input: Schema["RestrictGuardianLinkInput"]) =>
+    apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}/restrict`, { method: "POST", body: jsonBody(input) }),
+  liftGuardianRestriction: (linkId: string, version: Version) =>
+    apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}/lift-restriction`, { method: "POST", body: jsonBody({ version }) }),
+  endGuardianLink: (linkId: string, version: Version) =>
+    apiClient<GuardianLink>(`/api/v1/school/guardian-links/${encodePath(linkId)}/end`, { method: "POST", body: jsonBody({ version }) }),
+
+  listStaff: (params: StaffListParams = {}) =>
+    apiClient<Schema["PagedResponseOfStaffSummary"]>(withQuery("/api/v1/school/staff", params)),
+  getStaff: (staffMemberId: string) => apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}`),
+  createStaff: (input: Schema["CreateStaffInput"]) =>
+    apiClient<StaffDetails>("/api/v1/school/staff", { method: "POST", body: jsonBody(input), idempotencyKey: true }),
+  updateStaff: (staffMemberId: string, input: Schema["UpdateStaffInput"]) =>
+    apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}`, { method: "PUT", body: jsonBody(input) }),
+  updateEmployment: (staffMemberId: string, input: Schema["UpdateEmploymentTermsInput"]) =>
+    apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}/employment`, { method: "PUT", body: jsonBody(input) }),
+  staffTransition: (
+    staffMemberId: string,
+    action: "start-leave" | "return-from-leave" | "suspend" | "lift-suspension" | "reinstate",
+    version: Version
+  ) => apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}/${action}`, { method: "POST", body: jsonBody({ version }) }),
+  endEmployment: (staffMemberId: string, input: Schema["EndEmploymentInput"]) =>
+    apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}/end-employment`, { method: "POST", body: jsonBody(input) }),
+  deleteStaff: (staffMemberId: string, version: Version) =>
+    apiClient<void>(withQuery(`/api/v1/school/staff/${encodePath(staffMemberId)}`, { version }), { method: "DELETE" }),
+  addStaffIdentifier: (staffMemberId: string, input: Schema["IdentifierInput"]) =>
+    apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}/identifiers`, { method: "POST", body: jsonBody(input), idempotencyKey: true }),
+  removeStaffIdentifier: (staffMemberId: string, identifierId: string) =>
+    apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}/identifiers/${encodePath(identifierId)}`, { method: "DELETE" }),
+  linkStaffAccount: (staffMemberId: string, input: Schema["LinkAccountInput"]) =>
+    apiClient<StaffDetails>(`/api/v1/school/staff/${encodePath(staffMemberId)}/account-link`, { method: "POST", body: jsonBody(input) }),
+  unlinkStaffAccount: (staffMemberId: string, version: Version) =>
+    apiClient<StaffDetails>(withQuery(`/api/v1/school/staff/${encodePath(staffMemberId)}/account-link`, { version }), { method: "DELETE" }),
+  getCompensation: (staffMemberId: string) =>
+    apiClient<Compensation | null>(`/api/v1/school/staff/${encodePath(staffMemberId)}/compensation`),
+  setCompensation: (staffMemberId: string, input: Schema["SetCompensationInput"]) =>
+    apiClient<Compensation>(`/api/v1/school/staff/${encodePath(staffMemberId)}/compensation`, { method: "PUT", body: jsonBody(input) }),
+};
+
+export const listStudents = peopleApi.listStudents;
+export const getStudent = peopleApi.getStudent;
+export const createStudent = peopleApi.createStudent;
+export const updateStudent = peopleApi.updateStudent;
+export const listStudentGuardians = peopleApi.listStudentGuardians;
+export const listGuardians = peopleApi.listGuardians;
+export const getGuardian = peopleApi.getGuardian;
+export const verifyGuardianLink = peopleApi.verifyGuardianLink;
+export const restrictGuardianLink = peopleApi.restrictGuardianLink;
+export const listStaff = peopleApi.listStaff;
+export const getStaffMember = peopleApi.getStaff;
+export const getStaffCompensation = peopleApi.getCompensation;
