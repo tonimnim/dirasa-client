@@ -23,7 +23,7 @@ import {
   Send,
 } from "lucide-react";
 
-export interface FamilyUnit {
+interface FamilyUnit {
   id: string;
   familyTitle: string;
   primaryGuardian: string;
@@ -39,7 +39,7 @@ export interface FamilyUnit {
   billingBalance: number;
 }
 
-export const INITIAL_FAMILIES: FamilyUnit[] = [
+const INITIAL_FAMILIES: FamilyUnit[] = [
   {
     id: "fam-1",
     familyTitle: "The Harrington Family",

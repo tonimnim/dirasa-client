@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState, useMemo } from "react";
 
 export type Theme = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
@@ -33,17 +33,20 @@ export function ThemeProvider({
 
   // Initialize theme from localStorage if available
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey) as Theme | null;
-      if (stored && (stored === "light" || stored === "dark" || stored === "system")) {
-        setThemeState(stored);
-      } else {
+    const timer = window.setTimeout(() => {
+      try {
+        const stored = localStorage.getItem(storageKey) as Theme | null;
+        if (stored && (stored === "light" || stored === "dark" || stored === "system")) {
+          setThemeState(stored);
+        } else {
+          setThemeState(defaultTheme);
+        }
+      } catch {
         setThemeState(defaultTheme);
       }
-    } catch {
-      setThemeState(defaultTheme);
-    }
-    setMounted(true);
+      setMounted(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [storageKey, defaultTheme]);
 
   // Apply theme to documentElement classList and style
@@ -94,20 +97,20 @@ export function ThemeProvider({
     }
   }, [theme, mounted]);
 
-  const setTheme = (newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
     try {
       localStorage.setItem(storageKey, newTheme);
     } catch (e) {
       console.error("Failed to save theme to localStorage", e);
     }
-  };
+  }, [storageKey]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     if (theme === "light") setTheme("dark");
     else if (theme === "dark") setTheme("system");
     else setTheme("light");
-  };
+  }, [setTheme, theme]);
 
   const contextValue = useMemo(
     () => ({
@@ -116,7 +119,7 @@ export function ThemeProvider({
       setTheme,
       toggleTheme,
     }),
-    [theme, resolvedTheme]
+    [theme, resolvedTheme, setTheme, toggleTheme]
   );
 
   return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;

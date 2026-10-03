@@ -69,7 +69,7 @@ interface LedgerTransaction {
 }
 
 // Invoices Dataset matching DreamClass exact figures ($33,600.00 overdue across 10 invoices, $0.00 collected)
-export const INITIAL_INVOICES: InvoiceRecord[] = [
+const INITIAL_INVOICES: InvoiceRecord[] = [
     {
       id: "inv-001",
       invoiceNumber: "INV-2026-0891",
